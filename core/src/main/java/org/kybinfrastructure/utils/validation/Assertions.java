@@ -26,6 +26,8 @@ public final class Assertions {
 	 * @param value {@code String} value to be checked
 	 * @param message message to be set as the {@link IllegalArgumentException} message if the given
 	 *        {@code value} has no non space character
+	 * @throws IllegalArgumentException is thrown when the given {@code value} has no non space
+	 *         character
 	 */
 	public static void notBlank(String value, String message) {
 		if (value == null) {
