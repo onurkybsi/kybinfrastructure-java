@@ -1,3 +1,3 @@
 # kybinfrastructure
 
-This project includes my own implementations which can be used during a development of enterprise Java application.
+This project contains useful implementations which can be used during Java application development.

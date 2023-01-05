@@ -7,17 +7,25 @@
 	<groupId>org.kybinfrastructure</groupId>
 	<artifactId>main</artifactId>
 	<version>0.1.0</version>
-	<name>main</name>
+	<name>KybInfrastructure</name>
+	<description>This project contains useful implementations which can be used during Java application development</description>
 	<packaging>pom</packaging>
-	<url>https://github.com/onurkybsi</url>
+	<url>https://github.com/onurkybsi/kybinfrastructure-java</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<version.junit>5.9.1</version.junit>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${version.junit}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<modules>
