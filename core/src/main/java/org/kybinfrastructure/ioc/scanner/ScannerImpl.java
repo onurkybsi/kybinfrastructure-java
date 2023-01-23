@@ -6,6 +6,7 @@ import org.kybinfrastructure.utils.validation.Assertions;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Default implementation for {@link Scanner} interface
@@ -61,6 +62,12 @@ public class ScannerImpl implements Scanner {
 			setToAdd.add(
 					Class.forName(classNameToLoad, true, Thread.currentThread().getContextClassLoader()));
 		}
+	}
+
+	@Override
+	public Set<Class<?>> scan(Class<?> rootClass, Predicate<Class<?>> filter) {
+		// TODO Will be implemented
+		return null;
 	}
 
 }
