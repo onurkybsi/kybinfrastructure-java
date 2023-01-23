@@ -4,6 +4,9 @@ import org.kybinfrastructure.exceptions.KybInfrastructureException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,10 +19,13 @@ public final class KybContainer {
 	// TODO: I don't think that we need a thread-safe array ?
 	private static Set<Class<?>> CLASSES = new HashSet<>();
 
+	private static HashMap<Class<?>, Object> INSTANCES = new HashMap<>();
+
 	private KybContainer(Class<?> rootClass) {
 		try {
 			loadAllClasses(rootClass);
 			filterClassesToResolve();
+			initInstances();
 		} catch (ClassNotFoundException e) {
 			throw new KybInfrastructureException("Loading is not successful", e);
 		}
@@ -101,8 +107,29 @@ public final class KybContainer {
 	}
 	// #endregion
 
-	public Set<Class<?>> getLoadedClasses() {
-		return CLASSES;
+	// #region init
+	private static void initInstances() {
+		for (Class<?> classToInit : CLASSES) {
+			try {
+				Constructor<?> ctor = classToInit.getConstructors()[0];
+				INSTANCES.put(classToInit, ctor.newInstance());
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new KybInfrastructureException("Init is not successful", e);
+			}
+		}
+	}
+	// #endregion
+
+	public <T> T getImpl(Class<T> classInstance) {
+		Object instance = INSTANCES.get(classInstance);
+		if (instance == null) {
+			throw new KybInfrastructureException("No implementation found by given class instance!");
+		}
+		if (classInstance.isInstance(instance)) {
+			return (T) instance;
+		}
+		throw new KybInfrastructureException("No implementation found by given class instance!");
 	}
 
 }
