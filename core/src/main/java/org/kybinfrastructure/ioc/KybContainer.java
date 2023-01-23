@@ -1,8 +1,7 @@
 package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exceptions.KybInfrastructureException;
-import org.kybinfrastructure.utils.validation.Assertions;
-import java.io.File;
+import org.kybinfrastructure.ioc.scanner.ScannerImpl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -18,72 +17,19 @@ public final class KybContainer {
 
 	// TODO: I don't think that we need a thread-safe array ?
 	private static Set<Class<?>> CLASSES = new HashSet<>();
-
 	private static HashMap<Class<?>, Object> INSTANCES = new HashMap<>();
 
-	private KybContainer(Class<?> rootClass) {
+	private Scanner scanner = new ScannerImpl(); // TODO: Another way!
+
+	KybContainer(Class<?> rootClass) {
 		try {
-			loadAllClasses(rootClass);
+			CLASSES = scanner.scan(rootClass);
 			filterClassesToResolve();
 			initInstances();
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			throw new KybInfrastructureException("Loading is not successful", e);
 		}
 	}
-
-	// #region builders
-	/**
-	 * 
-	 * @param rootClass
-	 * @return
-	 */
-	public static KybContainer build(Class<?> rootClass) {
-		Assertions.notNull(rootClass, "rootClass cannot be null!");
-		return new KybContainer(rootClass);
-	}
-	// #endregion
-
-	// #region loading
-	private void loadAllClasses(Class<?> rootClass) throws ClassNotFoundException {
-		String rootDirectoryPathToScan = extractRootDirectoryPath(rootClass);
-		File rootDirectoryToScan = new File(rootDirectoryPathToScan);
-
-		File[] subFilesAndDirectoriesOfRoot = rootDirectoryToScan.listFiles();
-		for (int i = 0; i < subFilesAndDirectoriesOfRoot.length; i++) {
-			loadClassByBuildingFullyQualifiedName(subFilesAndDirectoriesOfRoot[i],
-					new StringBuilder(rootClass.getPackageName() + "."));
-		}
-	}
-
-	private static String extractRootDirectoryPath(Class<?> rootClass) {
-		String rootClassFilePath =
-				rootClass.getResource(rootClass.getSimpleName() + ".class").getPath();
-		return rootClassFilePath.substring(0,
-				rootClassFilePath.length() - (rootClass.getSimpleName().length() + 7));
-	}
-
-	private static void loadClassByBuildingFullyQualifiedName(File file,
-			StringBuilder builtPackageName) throws ClassNotFoundException {
-		if (file.isDirectory()) {
-			builtPackageName.append(file.getName());
-			builtPackageName.append(".");
-
-			File[] innerFiles = file.listFiles();
-			for (int i = 0; i < innerFiles.length; i++) {
-				loadClassByBuildingFullyQualifiedName(innerFiles[i], new StringBuilder(builtPackageName));
-			}
-		} else {
-			if (!file.getName().endsWith(".class")) {
-				return;
-			}
-
-			String classNameToLoad = String.format("%s%s", builtPackageName.toString(),
-					file.getName().substring(0, file.getName().length() - 6 /* .class */));
-			CLASSES.add(
-					Class.forName(classNameToLoad, true, Thread.currentThread().getContextClassLoader()));
-		}
-	}
-	// #endregion
 
 	// #region filtering
 	private static void filterClassesToResolve() {
