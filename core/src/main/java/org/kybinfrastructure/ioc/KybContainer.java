@@ -3,6 +3,7 @@ package org.kybinfrastructure.ioc;
 import org.kybinfrastructure.exceptions.KybInfrastructureException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,12 +18,14 @@ public final class KybContainer {
 
 	private KybContainer(Class<?> rootClass) {
 		try {
-			loadClasses(rootClass);
+			loadAllClasses(rootClass);
+			filterClassesToResolve();
 		} catch (ClassNotFoundException e) {
 			throw new KybInfrastructureException("Loading is not successful", e);
 		}
 	}
 
+	// #region builders
 	/**
 	 * 
 	 * @param rootClass
@@ -32,45 +35,71 @@ public final class KybContainer {
 		Assertions.notNull(rootClass, "rootClass cannot be null!");
 		return new KybContainer(rootClass);
 	}
+	// #endregion
 
-	private void loadClasses(Class<?> rootClass) throws ClassNotFoundException {
-		String rootDirectoryToScan = locateRootClassDirectoryPath(rootClass);
-		File rootDirectory = new File(rootDirectoryToScan);
-		File[] subFilesAndDirectoriesOfRoot = rootDirectory.listFiles();
+	// #region loading
+	private void loadAllClasses(Class<?> rootClass) throws ClassNotFoundException {
+		String rootDirectoryPathToScan = extractRootDirectoryPath(rootClass);
+		File rootDirectoryToScan = new File(rootDirectoryPathToScan);
+
+		File[] subFilesAndDirectoriesOfRoot = rootDirectoryToScan.listFiles();
 		for (int i = 0; i < subFilesAndDirectoriesOfRoot.length; i++) {
 			loadClassByBuildingFullyQualifiedName(subFilesAndDirectoriesOfRoot[i],
 					new StringBuilder(rootClass.getPackageName() + "."));
 		}
 	}
 
-	private static String locateRootClassDirectoryPath(Class<?> rootClass) {
+	private static String extractRootDirectoryPath(Class<?> rootClass) {
 		String rootClassFilePath =
 				rootClass.getResource(rootClass.getSimpleName() + ".class").getPath();
 		return rootClassFilePath.substring(0,
 				rootClassFilePath.length() - (rootClass.getSimpleName().length() + 7));
 	}
 
-	private static void loadClassByBuildingFullyQualifiedName(File innerFile,
-			StringBuilder buildPackageName) throws ClassNotFoundException {
-		if (innerFile.isDirectory()) {
-			buildPackageName.append(innerFile.getName());
-			buildPackageName.append(".");
+	private static void loadClassByBuildingFullyQualifiedName(File file,
+			StringBuilder builtPackageName) throws ClassNotFoundException {
+		if (file.isDirectory()) {
+			builtPackageName.append(file.getName());
+			builtPackageName.append(".");
 
-			File[] innerFilesOfInternalFile = innerFile.listFiles();
-			for (int i = 0; i < innerFilesOfInternalFile.length; i++) {
-				loadClassByBuildingFullyQualifiedName(innerFilesOfInternalFile[i], buildPackageName);
+			File[] innerFiles = file.listFiles();
+			for (int i = 0; i < innerFiles.length; i++) {
+				loadClassByBuildingFullyQualifiedName(innerFiles[i], new StringBuilder(builtPackageName));
 			}
 		} else {
-			if (!innerFile.getName().endsWith(".class")) {
+			if (!file.getName().endsWith(".class")) {
 				return;
 			}
 
-			String classNameToLoad = String.format("%s%s", buildPackageName.toString(),
-					innerFile.getName().substring(0, innerFile.getName().length() - 6 /* .class */));
+			String classNameToLoad = String.format("%s%s", builtPackageName.toString(),
+					file.getName().substring(0, file.getName().length() - 6 /* .class */));
 			CLASSES.add(
 					Class.forName(classNameToLoad, true, Thread.currentThread().getContextClassLoader()));
 		}
 	}
+	// #endregion
+
+	// #region filtering
+	private static void filterClassesToResolve() {
+		Set<Class<?>> filtered = new HashSet<>();
+		for (Class<?> loadedClass : CLASSES) {
+			if (checkWhetherHasImplAnnotation(loadedClass)) {
+				filtered.add(loadedClass);
+			}
+		}
+		CLASSES = filtered;
+	}
+
+	private static boolean checkWhetherHasImplAnnotation(Class<?> loadedClass) {
+		Annotation[] annotations = loadedClass.getAnnotations();
+		for (int i = 0; i < annotations.length; i++) {
+			if (Impl.class.equals(annotations[i].annotationType())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	// #endregion
 
 	public Set<Class<?>> getLoadedClasses() {
 		return CLASSES;
