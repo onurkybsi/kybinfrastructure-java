@@ -30,8 +30,23 @@ public class ScannerImpl implements Scanner {
 
 			return foundClasses;
 		} catch (Exception e) {
-			throw new KybInfrastructureException("" /* TODO: Use a common way! */);
+			throw new KybInfrastructureException("Scanning is not successful", e);
 		}
+	}
+
+	@Override
+	public Set<Class<?>> scan(Class<?> rootClass, Predicate<Class<?>> filter) {
+		Assertions.notNull(rootClass, "rootClass cannot be null!");
+		Assertions.notNull(filter, "filter cannot be null!");
+
+		Set<Class<?>> scannedClasses = new HashSet<>();
+		for (Class<?> scannedClass : scan(rootClass)) {
+			if (filter.test(scannedClass)) {
+				scannedClasses.add(scannedClass);
+			}
+		}
+
+		return scannedClasses;
 	}
 
 	private static String extractRootDirectoryPath(Class<?> rootClass) {
@@ -62,12 +77,6 @@ public class ScannerImpl implements Scanner {
 			setToAdd.add(
 					Class.forName(classNameToLoad, true, Thread.currentThread().getContextClassLoader()));
 		}
-	}
-
-	@Override
-	public Set<Class<?>> scan(Class<?> rootClass, Predicate<Class<?>> filter) {
-		// TODO Will be implemented
-		return null;
 	}
 
 }
