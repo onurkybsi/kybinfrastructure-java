@@ -1,4 +1,4 @@
-package org.kybinfrastructure.ioc;
+package org.kybinfrastructure.ioc.scanner;
 
 import java.util.Set;
 import java.util.function.Predicate;

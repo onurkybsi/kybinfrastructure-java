@@ -1,9 +1,11 @@
 package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exceptions.KybInfrastructureException;
+import org.kybinfrastructure.ioc.initializer.Initializer;
+import org.kybinfrastructure.ioc.initializer.InitializerImpl;
+import org.kybinfrastructure.ioc.scanner.Scanner;
 import org.kybinfrastructure.ioc.scanner.ScannerImpl;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import org.kybinfrastructure.utils.validation.Assertions;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -15,43 +17,30 @@ public final class KybContainer {
 
 	private static final HashMap<Class<?>, Object> INSTANCES = new HashMap<>();
 
-	private Scanner scanner = new ScannerImpl(); // TODO: Another way!
+	private static final Scanner SCANNER = new ScannerImpl(); // TODO: Another way!
+	private static final Initializer INITIALIZER = new InitializerImpl(); // TODO: Another way!
 
 	KybContainer(Class<?> rootClass) {
 		try {
 			Set<Class<?>> classesToInit =
-					scanner.scan(rootClass, classtToLoad -> classtToLoad.getAnnotation(Impl.class) != null);
-			initInstances(classesToInit);
+					SCANNER.scan(rootClass, classtToLoad -> classtToLoad.getAnnotation(Impl.class) != null);
+			classesToInit.forEach(c -> INSTANCES.put(c, INITIALIZER.init(c)));
 		} catch (Exception e) {
 			throw new KybInfrastructureException("Loading is not successful", e);
 		}
 	}
 
-	// #region init
-	private static void initInstances(Set<Class<?>> classesToInit) {
-		for (Class<?> classToInit : classesToInit) {
-			try {
-				// 1 - How can we decide to the constructor which is used to init ?
-				// 2 - How can we manage scopes ?
-				Constructor<?> ctor = classToInit.getConstructors()[0];
-				INSTANCES.put(classToInit, ctor.newInstance());
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
-				throw new KybInfrastructureException("Init is not successful", e);
-			}
-		}
-	}
-	// #endregion
-
 	public <T> T getImpl(Class<T> classInstance) {
+		Assertions.notNull(classInstance, "classInstance cannot be null!");
+
 		Object instance = INSTANCES.get(classInstance);
 		if (instance == null) {
-			throw new KybInfrastructureException("No implementation found by given class instance!");
+			throw new KybInfrastructureException("No implementation found by the given class instance!");
 		}
 		if (classInstance.isInstance(instance)) {
-			return (T) instance;
+			return classInstance.isInstance(instance) ? classInstance.cast(instance) : null;
 		}
-		throw new KybInfrastructureException("No implementation found by given class instance!");
+		throw new KybInfrastructureException("No implementation found by the given class instance!");
 	}
 
 }
