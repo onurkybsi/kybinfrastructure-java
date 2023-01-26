@@ -26,7 +26,7 @@ public final class KybContainer {
 					SCANNER.scan(rootClass, classtToLoad -> classtToLoad.getAnnotation(Impl.class) != null);
 			classesToInit.forEach(c -> INSTANCES.put(c, INITIALIZER.init(c)));
 		} catch (Exception e) {
-			throw new KybInfrastructureException("Loading is not successful", e);
+			throw new KybInfrastructureException("Container coulnd't be constructed!", e);
 		}
 	}
 
@@ -37,10 +37,12 @@ public final class KybContainer {
 		if (instance == null) {
 			throw new KybInfrastructureException("No implementation found by the given class instance!");
 		}
+
 		if (classInstance.isInstance(instance)) {
-			return classInstance.isInstance(instance) ? classInstance.cast(instance) : null;
+			return classInstance.cast(instance);
 		}
-		throw new KybInfrastructureException("No implementation found by the given class instance!");
+
+		throw new KybInfrastructureException("Initiated instance couldn't be cast to the actual type!");
 	}
 
 }

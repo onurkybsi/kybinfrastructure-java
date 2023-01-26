@@ -75,8 +75,7 @@ public class ScannerImpl implements Scanner {
 
 			String classNameToLoad = String.format("%s%s", builtPackageName.toString(),
 					file.getName().substring(0, file.getName().length() - CLASS_FILE_EXTENSION.length()));
-			setToAdd.add(
-					Class.forName(classNameToLoad, true, Thread.currentThread().getContextClassLoader()));
+			setToAdd.add(Class.forName(classNameToLoad));
 		}
 	}
 
