@@ -30,5 +30,6 @@
 
 	<modules>
 		<module>core</module>
+		<module>lab</module>
 	</modules>
 </project>
