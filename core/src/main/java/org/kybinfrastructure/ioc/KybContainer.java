@@ -15,19 +15,16 @@ import java.util.Set;
  */
 public final class KybContainer {
 
+	// TODO: Internal implementation should be abstracted
+	// An internal factory can provide the implementation by some kind of config like version number.
+	private static final Scanner SCANNER = new ScannerImpl();
+	private static final Initializer INITIALIZER = new InitializerImpl();
+
 	private static final HashMap<Class<?>, Object> INSTANCES = new HashMap<>();
 
-	private static final Scanner SCANNER = new ScannerImpl(); // TODO: Another way!
-	private static final Initializer INITIALIZER = new InitializerImpl(); // TODO: Another way!
-
 	KybContainer(Class<?> rootClass) {
-		try {
-			Set<Class<?>> classesToInit =
-					SCANNER.scan(rootClass, classtToLoad -> classtToLoad.getAnnotation(Impl.class) != null);
-			classesToInit.forEach(c -> INSTANCES.put(c, INITIALIZER.init(c)));
-		} catch (Exception e) {
-			throw new KybInfrastructureException("Container coulnd't be constructed!", e);
-		}
+		Set<Class<?>> classesToInit = SCANNER.scan(rootClass, KybContainer::classLoadingFilter);
+		classesToInit.forEach(c -> INSTANCES.put(c, INITIALIZER.init(c)));
 	}
 
 	public <T> T getImpl(Class<T> classInstance) {
@@ -43,6 +40,10 @@ public final class KybContainer {
 		}
 
 		throw new KybInfrastructureException("Initiated instance couldn't be cast to the actual type!");
+	}
+
+	private static boolean classLoadingFilter(Class<?> classToLoad) {
+		return classToLoad.getAnnotation(Impl.class) != null;
 	}
 
 }
