@@ -25,7 +25,7 @@ public class ScannerImpl implements Scanner {
 			Set<Class<?>> foundClasses = new HashSet<>();
 			File[] subFilesAndDirectoriesOfRoot = rootDirectoryToScan.listFiles();
 			for (int i = 0; i < subFilesAndDirectoriesOfRoot.length; i++) {
-				loadClassByItsBuildingName(foundClasses, subFilesAndDirectoriesOfRoot[i],
+				loadClassByBuildingItsName(foundClasses, subFilesAndDirectoriesOfRoot[i],
 						new StringBuilder(rootClass.getPackageName() + "."));
 			}
 
@@ -58,7 +58,7 @@ public class ScannerImpl implements Scanner {
 				- (rootClass.getSimpleName().length() + CLASS_FILE_EXTENSION.length()));
 	}
 
-	private static void loadClassByItsBuildingName(Set<Class<?>> setToAdd, File file,
+	private static void loadClassByBuildingItsName(Set<Class<?>> setToAdd, File file,
 			StringBuilder builtPackageName) throws ClassNotFoundException {
 		if (file.isDirectory()) {
 			builtPackageName.append(file.getName());
@@ -66,7 +66,7 @@ public class ScannerImpl implements Scanner {
 
 			File[] innerFiles = file.listFiles();
 			for (int i = 0; i < innerFiles.length; i++) {
-				loadClassByItsBuildingName(setToAdd, innerFiles[i], new StringBuilder(builtPackageName));
+				loadClassByBuildingItsName(setToAdd, innerFiles[i], new StringBuilder(builtPackageName));
 			}
 		} else {
 			if (!file.getName().endsWith(CLASS_FILE_EXTENSION)) {
