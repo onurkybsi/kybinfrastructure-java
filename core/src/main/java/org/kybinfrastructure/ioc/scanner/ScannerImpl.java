@@ -31,8 +31,8 @@ public class ScannerImpl implements Scanner {
 
 			return foundClasses;
 		} catch (Exception e) {
-			throw new KybInfrastructureException("Scanning is not successful & rootClass: %s",
-					rootClass.getName(), e);
+			throw new KybInfrastructureException(
+					"Scanning is not successful & rootClass: " + rootClass.getName(), e);
 		}
 	}
 
