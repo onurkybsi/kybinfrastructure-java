@@ -1,6 +1,7 @@
 package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exceptions.KybInfrastructureException;
+import org.kybinfrastructure.ioc.initializer.InitializationConfig;
 import org.kybinfrastructure.ioc.initializer.Initializer;
 import org.kybinfrastructure.ioc.initializer.InitializerImpl;
 import org.kybinfrastructure.ioc.scanner.Scanner;
@@ -18,13 +19,16 @@ public final class KybContainer {
 	// TODO: Internal implementation should be abstracted
 	// An internal factory can provide the implementation by some kind of config like version number.
 	private static final Scanner SCANNER = new ScannerImpl();
+	private static final DependencyResolver RESOLVER = new DependencyResolverImpl();
 	private static final Initializer INITIALIZER = new InitializerImpl();
 
 	private static final HashMap<Class<?>, Object> INSTANCES = new HashMap<>();
 
 	KybContainer(Class<?> rootClass) {
 		Set<Class<?>> classesToInit = SCANNER.scan(rootClass, KybContainer::classLoadingFilter);
-		classesToInit.forEach(c -> INSTANCES.put(c, INITIALIZER.init(c)));
+		RESOLVER.resolve(classesToInit);
+		classesToInit
+				.forEach(c -> INSTANCES.put(c, INITIALIZER.init(c, InitializationConfig.of(null))));
 	}
 
 	public <T> T getImpl(Class<T> classInstance) {
@@ -43,7 +47,8 @@ public final class KybContainer {
 	}
 
 	private static boolean classLoadingFilter(Class<?> classToLoad) {
-		return classToLoad.getAnnotation(Impl.class) != null;
+		return !classToLoad.isLocalClass() && !classToLoad.isMemberClass()
+				&& classToLoad.getAnnotation(Impl.class) != null;
 	}
 
 }
