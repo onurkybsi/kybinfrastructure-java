@@ -6,12 +6,12 @@ class ManagedClass {
 
 	private final Class<?> clazz;
 	private final Constructor<?> ctr;
-
-	private Class<?>[] ctrParams;
+	private final Class<?>[] ctrParams;
 
 	ManagedClass(Class<?> classToManage, Constructor<?> constructor) {
 		this.clazz = classToManage;
 		this.ctr = constructor;
+		this.ctrParams = constructor.getParameterTypes();
 	}
 
 	public Class<?> getClazz() {
@@ -24,10 +24,6 @@ class ManagedClass {
 
 	public Class<?>[] getCtrParams() {
 		return ctrParams;
-	}
-
-	public void setCtrParams(Class<?>[] ctrParams) {
-		this.ctrParams = ctrParams;
 	}
 
 }

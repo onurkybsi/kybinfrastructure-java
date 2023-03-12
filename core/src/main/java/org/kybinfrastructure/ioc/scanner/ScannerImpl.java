@@ -36,19 +36,22 @@ public class ScannerImpl implements Scanner {
 		}
 	}
 
+	// TODO: Not a good approach. We should NOT even load if the type doesn't safisfy the filtering
+	// condition
 	@Override
 	public Set<Class<?>> scan(Class<?> rootClass, Predicate<Class<?>> filter) {
-		Assertions.notNull(rootClass, "rootClass cannot be null!");
 		Assertions.notNull(filter, "filter cannot be null!");
 
-		Set<Class<?>> scannedClasses = new HashSet<>();
-		for (Class<?> scannedClass : scan(rootClass)) {
+		Set<Class<?>> scannedClasses = scan(rootClass);
+
+		Set<Class<?>> filteredScannedClasses = new HashSet<>();
+		for (Class<?> scannedClass : scannedClasses) {
 			if (filter.test(scannedClass)) {
-				scannedClasses.add(scannedClass);
+				filteredScannedClasses.add(scannedClass);
 			}
 		}
 
-		return scannedClasses;
+		return filteredScannedClasses;
 	}
 
 	private static String extractRootDirectoryPath(Class<?> rootClass) {
