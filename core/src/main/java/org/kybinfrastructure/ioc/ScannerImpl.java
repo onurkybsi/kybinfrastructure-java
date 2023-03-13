@@ -1,4 +1,4 @@
-package org.kybinfrastructure.ioc.scanner;
+package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exceptions.KybInfrastructureException;
 import org.kybinfrastructure.utils.validation.Assertions;
