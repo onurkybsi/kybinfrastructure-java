@@ -1,6 +1,6 @@
 package org.kybinfrastructure.ioc;
 
-import org.kybinfrastructure.exceptions.KybInfrastructureException;
+import org.kybinfrastructure.exception.UnexpectedException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.io.File;
 import java.util.HashSet;
@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Default implementation for {@link Scanner} interface
+ * Default implementation for {@link Scanner}
  */
-public class ScannerImpl implements Scanner {
+class ScannerImpl implements Scanner {
 
 	private static final String CLASS_FILE_EXTENSION = ".class";
 
@@ -31,8 +31,8 @@ public class ScannerImpl implements Scanner {
 
 			return foundClasses;
 		} catch (Exception e) {
-			throw new KybInfrastructureException(
-					"Scanning is not successful & rootClass: " + rootClass.getName(), e);
+			throw new UnexpectedException(
+					"Scanning is not successful for the root class: " + rootClass.getSimpleName(), e);
 		}
 	}
 

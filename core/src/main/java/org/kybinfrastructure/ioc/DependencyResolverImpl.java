@@ -1,11 +1,15 @@
 package org.kybinfrastructure.ioc;
 
-import org.kybinfrastructure.exceptions.KybInfrastructureException;
+import org.kybinfrastructure.exception.InvalidDataException;
+import org.kybinfrastructure.exception.KybInfrastructureException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Default implementation for {@link DependencyResolver}
+ */
 class DependencyResolverImpl implements DependencyResolver {
 
 	@Override
@@ -23,16 +27,17 @@ class DependencyResolverImpl implements DependencyResolver {
 
 		for (Class<?> classToManage : classesToManage) {
 			if (classToManage.getConstructors().length != 1) {
-				throw new KybInfrastructureException("Managed class can have only 1 constructor: %s",
-						classToManage);
+				throw new KybInfrastructureException(
+						"Managed classes can only have 1 constructor(%s has %s)", classToManage.getSimpleName(),
+						classToManage.getConstructors().length);
 			}
 
 			Constructor<?> ctr = classToManage.getConstructors()[0];
-			for (int i = 0; i < ctr.getParameterTypes().length; i++) {
-				if (!classesToManage.contains(ctr.getParameterTypes()[i])) {
+			for (Class<?> parameterType : ctr.getParameterTypes()) {
+				if (!classesToManage.contains(parameterType)) {
 					throw new KybInfrastructureException(
-							"Managed class has a nonmanaged class constructor parameter: %s -> %s", classToManage,
-							ctr.getParameterTypes()[i]);
+							"Managed class has a nonmanaged class constructor parameter: %s -> %s",
+							classToManage.getSimpleName(), parameterType.getSimpleName());
 				}
 			}
 
@@ -48,15 +53,14 @@ class DependencyResolverImpl implements DependencyResolver {
 				continue;
 			}
 
-			for (int i = 0; i < managedClass.getCtr().getParameterTypes().length; i++) {
-				Class<?> parameterType = managedClass.getCtr().getParameterTypes()[i];
+			for (Class<?> parameterType : managedClass.getCtr().getParameterTypes()) {
 				Class<?>[] constructorTypesOfParameter =
 						managedClasses.stream().filter(c -> c.getClazz().equals(parameterType)).findFirst()
 								.map(c -> c.getCtrParams()).orElseThrow();
 				for (Class<?> constructorTypeOfParameter : constructorTypesOfParameter) {
-					if (constructorTypeOfParameter.equals(managedClass.getClass())) {
-						throw new KybInfrastructureException("Interdependency has been found between %s & %s",
-								managedClass.getClass(), parameterType);
+					if (constructorTypeOfParameter.equals(managedClass.getClazz())) {
+						throw new InvalidDataException("Interdependency has been found between %s & %s",
+								managedClass.getClazz().getSimpleName(), parameterType.getSimpleName());
 					}
 				}
 			}

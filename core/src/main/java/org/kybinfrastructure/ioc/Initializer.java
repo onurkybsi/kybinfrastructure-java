@@ -1,6 +1,7 @@
 package org.kybinfrastructure.ioc;
 
-import org.kybinfrastructure.exceptions.KybInfrastructureException;
+import org.kybinfrastructure.exception.KybInfrastructureException;
+import org.kybinfrastructure.exception.NotFoundException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +21,7 @@ class Initializer {
 
 	static Initializer build(Set<ManagedClass> managedClasses) {
 		Assertions.notEmpty(managedClasses, "managedClasses cannot be null!");
-		assertWheterAllTypesAreInitiable(managedClasses);
+		assertWheterAllManagedClassesAreInitiable(managedClasses);
 
 		LinkedHashMap<Class<?>, ManagedClass> managedClassesToInitialize = new LinkedHashMap<>();
 		managedClasses.stream()
@@ -49,38 +50,31 @@ class Initializer {
 		}
 	}
 
-	/**
-	 * Returns the <i>KybContainer</i> initialized instance of the given type.
-	 *
-	 * @param <T> type of the instance
-	 * @param classInstance class instance of the type
-	 * @return <i>KybContainer</i> initialized instance
-	 * @throws KybInfrastructureException if no instance found in the container by given type
-	 */
 	<T> T getImpl(Class<T> classInstance) {
 		Assertions.notNull(classInstance, "classInstance cannot be null!");
 
 		Object instance = instances.get(classInstance);
 		if (instance == null) {
-			// TODO: Should we use exception type like NoImpFound extends KybInfrastructureException ?
-			throw new KybInfrastructureException("No implementation found by the given class instance!");
+			throw new NotFoundException(
+					"No implementation found by the given class instance " + classInstance.getSimpleName());
 		}
 
 		if (classInstance.isInstance(instance)) {
 			return classInstance.cast(instance);
 		}
 
-		throw new KybInfrastructureException("Initiated instance couldn't be cast to the actual type!");
+		throw new NotFoundException("Initiated instance couldn't be cast to the actual type + "
+				+ classInstance.getSimpleName());
 	}
 
-	private static void assertWheterAllTypesAreInitiable(Set<ManagedClass> managedClasses) {
+	private static void assertWheterAllManagedClassesAreInitiable(Set<ManagedClass> managedClasses) {
 		for (ManagedClass managedClass : managedClasses) {
 			Class<?>[] constructorParameterTypes = managedClass.getCtrParams();
 			for (Class<?> constructorParameterType : constructorParameterTypes) {
 				if (managedClasses.stream().noneMatch(m -> m.getClazz().equals(constructorParameterType))) {
 					throw new KybInfrastructureException(
-							"Managed classes has not the constructor parameter of %s: %s", managedClass,
-							constructorParameterType);
+							"Managed class has a nonmanaged class constructor parameter: %s -> %s",
+							managedClass.getClazz().getSimpleName(), constructorParameterType.getSimpleName());
 				}
 			}
 		}

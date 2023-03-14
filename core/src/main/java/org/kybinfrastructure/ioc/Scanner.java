@@ -4,22 +4,26 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Represents the API which scans a classpath to find related classes
+ * Represents the API which scans some locations to find related classes
+ * 
+ * @author Onur Kayabasi (onurbpm@outlook.com)
  */
 public interface Scanner {
 
 	/**
-	 * Scans the classes which are located in the directory of given {@code rootClass}, or the sub
+	 * <p>
+	 * Loads the classes which are located in the directory of given {@code rootClass}, or the sub
 	 * directories of it.
+	 * </p>
 	 * 
-	 * @param rootClass class which located in the root directory for the scanning
+	 * @param rootClass class which is located in the root directory for the scanning
 	 * @return classes found during the scanning
 	 */
 	Set<Class<?>> scan(Class<?> rootClass);
 
 	/**
 	 * <p>
-	 * Scans the classes which are located in the directory of given {@code rootClass}, or the sub
+	 * Loads the classes which are located in the directory of given {@code rootClass}, or the sub
 	 * directories of it.
 	 * </p>
 	 * <p>
@@ -28,9 +32,9 @@ public interface Scanner {
 	 * </p>
 	 * 
 	 * 
-	 * @param rootClass class which located in the root directory for the scanning
-	 * @param filter criteria which included classes have to satisfy
-	 * @return classes in the target directories which satify the given filter condition
+	 * @param rootClass class which is located in the root directory for the scanning
+	 * @param filter criteria which the result set included classes have to satisfy
+	 * @return classes found during the scanning
 	 */
 	Set<Class<?>> scan(Class<?> rootClass, Predicate<Class<?>> filter);
 

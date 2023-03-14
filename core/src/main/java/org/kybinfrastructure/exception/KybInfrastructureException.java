@@ -1,7 +1,9 @@
-package org.kybinfrastructure.exceptions;
+package org.kybinfrastructure.exception;
 
 /**
- * Base runtime exception type of <i>KybInfrastructure</i> framework
+ * Base runtime exception of <i>KybInfrastructure</i> framework.
+ * 
+ * @author Onur Kayabasi (onurbpm@outlook.com)
  */
 public class KybInfrastructureException extends RuntimeException {
 

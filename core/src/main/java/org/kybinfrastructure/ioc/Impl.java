@@ -6,7 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation which specifies that the class is loaded by {@link KybContainer}
+ * <p>
+ * Annotation which specifies that the class is loaded by {@link KybContainer}.
+ * </p>
+ * 
+ * @author Onur Kayabasi (onurbpm@outlook.com)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

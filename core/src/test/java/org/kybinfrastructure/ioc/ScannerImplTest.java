@@ -1,4 +1,4 @@
-package org.kybinfrastructure.ioc.initializer;
+package org.kybinfrastructure.ioc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.kybinfrastructure.exceptions.KybInfrastructureException;
-import org.kybinfrastructure.ioc.ScannerImpl;
+import org.kybinfrastructure.exception.KybInfrastructureException;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;

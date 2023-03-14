@@ -2,6 +2,9 @@ package org.kybinfrastructure.ioc;
 
 import java.lang.reflect.Constructor;
 
+/**
+ * Internal wrapper for the types which are managed by {@link KybContainer}
+ */
 class ManagedClass {
 
 	private final Class<?> clazz;
