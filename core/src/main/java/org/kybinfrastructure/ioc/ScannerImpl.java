@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 /**
  * Default implementation for {@link Scanner}
  */
+@Impl
 class ScannerImpl implements Scanner {
 
 	private static final String CLASS_FILE_EXTENSION = ".class";
@@ -36,8 +37,8 @@ class ScannerImpl implements Scanner {
 		}
 	}
 
-	// TODO: Not a good approach. We should NOT even load if the type doesn't safisfy the filtering
-	// condition
+	// TODO: Not a good approach.
+	// We should NOT even load if the type doesn't safisfy the filtering condition
 	@Override
 	public Set<Class<?>> scan(Class<?> rootClass, Predicate<Class<?>> filter) {
 		Assertions.notNull(filter, "filter cannot be null!");

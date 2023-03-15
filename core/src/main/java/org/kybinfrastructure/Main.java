@@ -1,10 +1,7 @@
 package org.kybinfrastructure;
 
 import org.kybinfrastructure.ioc.KybContainerBuilder;
-import org.kybinfrastructure.ioc.testing_classes.SomeImpl;
-import org.kybinfrastructure.ioc.testing_classes.SomeImplX;
-import org.kybinfrastructure.ioc.testing_classes.SomeImplXX;
-import org.kybinfrastructure.ioc.testing_classes.SomeImplXXX;
+import org.kybinfrastructure.ioc.Scanner;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,23 +12,9 @@ public final class Main {
 		System.out.println("Hello World!");
 
 		var container = KybContainerBuilder.build(Main.class);
+		var scannerImp = container.getImpl(Scanner.class);
 
-		var someImpl = container.getImpl(SomeImpl.class);
-		var someImplX = container.getImpl(SomeImplX.class);
-		var someImplXX = container.getImpl(SomeImplXX.class);
-		System.out.println(someImpl);
-		System.out.println(someImplX);
-		System.out.println(someImplXX);
-
-		var someImpl_2 = container.getImpl(SomeImpl.class);
-		var someImplX_2 = container.getImpl(SomeImplX.class);
-		var someImplXX_2 = container.getImpl(SomeImplXX.class);
-		System.out.println(someImpl_2);
-		System.out.println(someImplX_2);
-		System.out.println(someImplXX_2);
-
-		var someImplXXX = container.getImpl(SomeImplXXX.class);
-		System.out.println(someImplXXX);
+		System.out.println("Done!");
 	}
 
 }

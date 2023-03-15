@@ -1,7 +1,6 @@
 package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exception.InvalidDataException;
-import org.kybinfrastructure.exception.KybInfrastructureException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
@@ -26,22 +25,21 @@ class DependencyResolverImpl implements DependencyResolver {
 		Set<ManagedClass> initialized = new HashSet<>();
 
 		for (Class<?> classToManage : classesToManage) {
-			if (classToManage.getConstructors().length != 1) {
-				throw new KybInfrastructureException(
-						"Managed classes can only have 1 constructor(%s has %s)", classToManage.getSimpleName(),
-						classToManage.getConstructors().length);
+			if (classToManage.getDeclaredConstructors().length > 1) {
+				throw new InvalidDataException("Managed classes can only have 1 constructor(%s has %s)",
+						classToManage.getSimpleName(), classToManage.getConstructors().length);
 			}
 
-			Constructor<?> ctr = classToManage.getConstructors()[0];
+			Constructor<?> ctr = classToManage.getDeclaredConstructors()[0];
 			for (Class<?> parameterType : ctr.getParameterTypes()) {
 				if (!classesToManage.contains(parameterType)) {
-					throw new KybInfrastructureException(
+					throw new InvalidDataException(
 							"Managed class has a nonmanaged class constructor parameter: %s -> %s",
 							classToManage.getSimpleName(), parameterType.getSimpleName());
 				}
 			}
 
-			initialized.add(new ManagedClass(classToManage, classToManage.getConstructors()[0]));
+			initialized.add(new ManagedClass(classToManage, ctr));
 		}
 
 		return initialized;

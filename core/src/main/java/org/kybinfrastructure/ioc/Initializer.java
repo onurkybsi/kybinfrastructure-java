@@ -1,15 +1,23 @@
 package org.kybinfrastructure.ioc;
 
-import org.kybinfrastructure.exception.KybInfrastructureException;
+import org.kybinfrastructure.exception.InvalidDataException;
 import org.kybinfrastructure.exception.NotFoundException;
+import org.kybinfrastructure.exception.UnexpectedException;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Component which handles the logic of {@link KybContainer} related with initializing the managed
+ * class and serving them
+ * 
+ * @author Onur Kayabasi (onurbpm@outlook.com)
+ */
 class Initializer {
 
 	private final Map<Class<?>, ManagedClass> managedClasses;
@@ -46,25 +54,25 @@ class Initializer {
 			}
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
-			throw new KybInfrastructureException("Initialization is not successful!", e);
+			throw new UnexpectedException("Initialization is not successful!", e);
 		}
 	}
 
 	<T> T getImpl(Class<T> classInstance) {
 		Assertions.notNull(classInstance, "classInstance cannot be null!");
 
-		Object instance = instances.get(classInstance);
+		Object instance = findManagedInstance(classInstance);
 		if (instance == null) {
 			throw new NotFoundException(
 					"No implementation found by the given class instance " + classInstance.getSimpleName());
 		}
 
-		if (classInstance.isInstance(instance)) {
+		if (classInstance.isInstance(instance) || classInstance.isAssignableFrom(instance.getClass())) {
 			return classInstance.cast(instance);
 		}
 
-		throw new NotFoundException("Initiated instance couldn't be cast to the actual type + "
-				+ classInstance.getSimpleName());
+		throw new NotFoundException(
+				"Initiated instance couldn't be cast to the actual type: " + classInstance.getSimpleName());
 	}
 
 	private static void assertWheterAllManagedClassesAreInitiable(Set<ManagedClass> managedClasses) {
@@ -72,7 +80,7 @@ class Initializer {
 			Class<?>[] constructorParameterTypes = managedClass.getCtrParams();
 			for (Class<?> constructorParameterType : constructorParameterTypes) {
 				if (managedClasses.stream().noneMatch(m -> m.getClazz().equals(constructorParameterType))) {
-					throw new KybInfrastructureException(
+					throw new InvalidDataException(
 							"Managed class has a nonmanaged class constructor parameter: %s -> %s",
 							managedClass.getClazz().getSimpleName(), constructorParameterType.getSimpleName());
 				}
@@ -89,6 +97,18 @@ class Initializer {
 		}
 
 		return parameters;
+	}
+
+	private <T> Object findManagedInstance(Class<T> assignableTypeOfInstance) {
+		Object instance = instances.get(assignableTypeOfInstance);
+		if (instance != null) {
+			return instance;
+		}
+
+		return managedClasses.keySet().stream()
+				.filter(
+						m -> Arrays.stream(m.getInterfaces()).anyMatch(i -> i.equals(assignableTypeOfInstance)))
+				.findFirst().map(instances::get).orElse(null);
 	}
 
 }
