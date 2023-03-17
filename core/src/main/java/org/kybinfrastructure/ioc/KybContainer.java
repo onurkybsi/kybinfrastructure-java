@@ -16,13 +16,13 @@ public final class KybContainer {
 	private static final Scanner SCANNER = new ScannerImpl();
 	private static final DependencyResolver RESOLVER = new DependencyResolverImpl();
 
-	private final Initializer initializer;
+	private final Container container;
 
 	KybContainer(Class<?> rootClass) {
 		Set<Class<?>> classesToInit = SCANNER.scan(rootClass, KybContainer::classLoadingFilter);
 		Set<ManagedClass> managedClasses = RESOLVER.resolve(classesToInit);
-		this.initializer = Initializer.build(managedClasses);
-		this.initializer.init();
+		this.container = Container.build(managedClasses);
+		this.container.init();
 	}
 
 	/**
@@ -36,7 +36,7 @@ public final class KybContainer {
 	 * @throws NotFoundException if no instance found in the container by given type
 	 */
 	public <T> T getImpl(Class<T> classInstance) {
-		return initializer.getImpl(classInstance);
+		return container.getImpl(classInstance);
 	}
 
 	private static boolean classLoadingFilter(Class<?> classToLoad) {

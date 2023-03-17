@@ -13,6 +13,7 @@
 	<groupId>org.kybinfrastructure</groupId>
 	<artifactId>core</artifactId>
 	<version>0.1.0</version>
+	<packaging>jar</packaging>
 
 	<properties>
 		<version.junit-jupiter-engine>5.9.2</version.junit-jupiter-engine>

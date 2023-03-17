@@ -18,16 +18,16 @@ import java.util.Set;
  * 
  * @author Onur Kayabasi (onurbpm@outlook.com)
  */
-class Initializer {
+class Container {
 
 	private final Map<Class<?>, ManagedClass> managedClasses;
 	private final HashMap<Class<?>, Object> instances = new HashMap<>();
 
-	private Initializer(Map<Class<?>, ManagedClass> managedClasses) {
+	private Container(Map<Class<?>, ManagedClass> managedClasses) {
 		this.managedClasses = managedClasses;
 	}
 
-	static Initializer build(Set<ManagedClass> managedClasses) {
+	static Container build(Set<ManagedClass> managedClasses) {
 		Assertions.notEmpty(managedClasses, "managedClasses cannot be null!");
 		assertWheterAllManagedClassesAreInitiable(managedClasses);
 
@@ -36,7 +36,7 @@ class Initializer {
 				.sorted((m1, m2) -> m1.getCtr().getParameterCount() - m2.getCtr().getParameterCount())
 				.forEach(m -> managedClassesToInitialize.put(m.getClazz(), m));
 
-		return new Initializer(managedClassesToInitialize);
+		return new Container(managedClassesToInitialize);
 	}
 
 	void init() {
@@ -64,7 +64,7 @@ class Initializer {
 		Object instance = findManagedInstance(classInstance);
 		if (instance == null) {
 			throw new NotFoundException(
-					"No implementation found by the given class instance " + classInstance.getSimpleName());
+					"No implementation found by the given class instance: " + classInstance.getName());
 		}
 
 		if (classInstance.isInstance(instance) || classInstance.isAssignableFrom(instance.getClass())) {
@@ -107,7 +107,8 @@ class Initializer {
 
 		return managedClasses.keySet().stream()
 				.filter(
-						m -> Arrays.stream(m.getInterfaces()).anyMatch(i -> i.equals(assignableTypeOfInstance)))
+						m -> Arrays.stream(m.getInterfaces()).anyMatch(i -> i.equals(assignableTypeOfInstance))
+								|| m.getSuperclass().equals(assignableTypeOfInstance))
 				.findFirst().map(instances::get).orElse(null);
 	}
 
