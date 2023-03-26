@@ -4,11 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+import org.kybinfrastructure.exception.UnexpectedException;
+import org.kybinfrastructure.utils.ClassUtils;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import example.service.AnotherService;
 import example.service.SomeService;
+import example.service.sub.AnotherService;
 
 /*
  * Unit tests for the component {@link ScannerImpl}
@@ -46,6 +50,25 @@ class ScannerImplTest {
 		assertTrue(actualResult.stream().anyMatch(c -> AnotherService.class.equals(c)));
 		assertTrue(actualResult.stream()
 				.anyMatch(c -> Stream.of(c.getInterfaces()).anyMatch(i -> AnotherService.class.equals(i))));
+	}
+
+	@Test
+	void scan_ThrowsUnexpectedException_IfAnExceptionOccurredDuringScanning() {
+		// given
+		Class<?> rootClass = SomeService.class;
+		MockedStatic<ClassUtils> mockClassUtils = Mockito.mockStatic(ClassUtils.class);
+		mockClassUtils.when(() -> ClassUtils.resolveClassDirectoryPath(rootClass))
+				.thenThrow(RuntimeException.class);
+
+		// when
+		UnexpectedException thrownException =
+				assertThrows(UnexpectedException.class, () -> underTest.scan(rootClass));
+
+		// then
+		mockClassUtils.close();
+
+		assertEquals("Scanning is not successful for the root class: " + rootClass.getName(),
+				thrownException.getMessage());
 	}
 
 	@Test
@@ -89,6 +112,25 @@ class ScannerImplTest {
 		// then
 		assertEquals(2, actualResult.size());
 		assertTrue(actualResult.stream().anyMatch(c -> AnotherService.class.equals(c)));
+	}
+
+	@Test
+	void scanWithFilter_ThrowsUnexpectedException_IfAnExceptionOccurredDuringScanning() {
+		// given
+		Class<?> rootClass = SomeService.class;
+		MockedStatic<ClassUtils> mockClassUtils = Mockito.mockStatic(ClassUtils.class);
+		mockClassUtils.when(() -> ClassUtils.resolveClassDirectoryPath(rootClass))
+				.thenThrow(RuntimeException.class);
+
+		// when
+		UnexpectedException thrownException =
+				assertThrows(UnexpectedException.class, () -> underTest.scan(rootClass, c -> true));
+
+		// then
+		mockClassUtils.close();
+
+		assertEquals("Scanning is not successful for the root class: " + rootClass.getName(),
+				thrownException.getMessage());
 	}
 
 }

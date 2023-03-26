@@ -1,6 +1,7 @@
 package example.service;
 
 import org.kybinfrastructure.ioc.Impl;
+import example.service.sub.AnotherService;
 
 @Impl
 class SomeServiceImpl implements SomeService {
