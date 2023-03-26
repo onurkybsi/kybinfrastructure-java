@@ -1,6 +1,7 @@
 package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exception.UnexpectedException;
+import org.kybinfrastructure.utils.ClassUtils;
 import org.kybinfrastructure.utils.validation.Assertions;
 import java.io.File;
 import java.util.HashSet;
@@ -12,14 +13,12 @@ import java.util.function.Predicate;
  */
 class ScannerImpl implements Scanner {
 
-	private static final String CLASS_FILE_EXTENSION = ".class";
-
 	@Override
 	public Set<Class<?>> scan(Class<?> rootClass) {
 		Assertions.notNull(rootClass, "rootClass cannot be null!");
 
 		try {
-			String rootDirectoryPathToScan = extractRootDirectoryPath(rootClass);
+			String rootDirectoryPathToScan = ClassUtils.resolveClassDirectoryPath(rootClass);
 			File rootDirectoryToScan = new File(rootDirectoryPathToScan);
 
 			Set<Class<?>> foundClasses = new HashSet<>();
@@ -54,14 +53,6 @@ class ScannerImpl implements Scanner {
 		return filteredScannedClasses;
 	}
 
-	// TODO: This doesn't work for local classes!
-	private static String extractRootDirectoryPath(Class<?> rootClass) {
-		String rootClassFilePath =
-				rootClass.getResource(rootClass.getSimpleName() + CLASS_FILE_EXTENSION).getPath();
-		return rootClassFilePath.substring(0, rootClassFilePath.length()
-				- (rootClass.getSimpleName().length() + CLASS_FILE_EXTENSION.length()));
-	}
-
 	private static void loadClassByBuildingItsName(Set<Class<?>> setToAdd, File file,
 			StringBuilder builtPackageName) throws ClassNotFoundException {
 		if (file.isDirectory()) {
@@ -73,12 +64,12 @@ class ScannerImpl implements Scanner {
 				loadClassByBuildingItsName(setToAdd, innerFiles[i], new StringBuilder(builtPackageName));
 			}
 		} else {
-			if (!file.getName().endsWith(CLASS_FILE_EXTENSION)) {
+			if (!file.getName().endsWith(ClassUtils.CLASS_FILE_EXTENSION)) {
 				return;
 			}
 
-			String classNameToLoad = String.format("%s%s", builtPackageName.toString(),
-					file.getName().substring(0, file.getName().length() - CLASS_FILE_EXTENSION.length()));
+			String classNameToLoad = String.format("%s%s", builtPackageName.toString(), file.getName()
+					.substring(0, file.getName().length() - ClassUtils.CLASS_FILE_EXTENSION.length()));
 			setToAdd.add(Class.forName(classNameToLoad));
 		}
 	}

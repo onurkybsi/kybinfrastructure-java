@@ -1,4 +1,4 @@
-package example.service;
+package example.service.sub;
 
 import org.kybinfrastructure.ioc.Impl;
 

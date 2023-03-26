@@ -1,4 +1,4 @@
-package example.service;
+package example.service.sub;
 
 public interface AnotherService {
 
