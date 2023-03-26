@@ -10,7 +10,6 @@ import java.util.function.Predicate;
 /**
  * Default implementation for {@link Scanner}
  */
-@Impl
 class ScannerImpl implements Scanner {
 
 	private static final String CLASS_FILE_EXTENSION = ".class";
@@ -33,7 +32,7 @@ class ScannerImpl implements Scanner {
 			return foundClasses;
 		} catch (Exception e) {
 			throw new UnexpectedException(
-					"Scanning is not successful for the root class: " + rootClass.getSimpleName(), e);
+					"Scanning is not successful for the root class: " + rootClass.getName(), e);
 		}
 	}
 
@@ -55,6 +54,7 @@ class ScannerImpl implements Scanner {
 		return filteredScannedClasses;
 	}
 
+	// TODO: This doesn't work for local classes!
 	private static String extractRootDirectoryPath(Class<?> rootClass) {
 		String rootClassFilePath =
 				rootClass.getResource(rootClass.getSimpleName() + CLASS_FILE_EXTENSION).getPath();

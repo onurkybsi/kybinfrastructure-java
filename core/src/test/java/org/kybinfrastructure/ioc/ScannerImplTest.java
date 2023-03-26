@@ -4,13 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.kybinfrastructure.exception.KybInfrastructureException;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import example.service.AnotherService;
+import example.service.SomeService;
 
 /*
  * Unit tests for the component {@link ScannerImpl}
@@ -33,67 +31,64 @@ class ScannerImplTest {
 	}
 
 	@Test
-	void scan_ReturnsAllClassInstancesOfClassesInThePathOfRootClassOrUnderThePathOfRootClass() {
+	void scan_ReturnsAllClassInstancesOfClassesInThePathOfRootClassOrInTheSubPathsOfRootClass() {
 		// given
-		Class<?> rootClass = ScannerImplTest.class;
+		Class<?> rootClass = SomeService.class;
 
 		// when
 		Set<Class<?>> actualResult = underTest.scan(rootClass);
 
 		// then
-		assertEquals(2, actualResult.size());
-		assertTrue(actualResult.stream().anyMatch(c -> ScannerImplTest.class.equals(c)));
+		assertEquals(4, actualResult.size());
+		assertTrue(actualResult.stream().anyMatch(c -> SomeService.class.equals(c)));
 		assertTrue(actualResult.stream()
-				.anyMatch(c -> c.getSimpleName().equals("InnerClassToCauseException")));
+				.anyMatch(c -> Stream.of(c.getInterfaces()).anyMatch(i -> SomeService.class.equals(i))));
+		assertTrue(actualResult.stream().anyMatch(c -> AnotherService.class.equals(c)));
+		assertTrue(actualResult.stream()
+				.anyMatch(c -> Stream.of(c.getInterfaces()).anyMatch(i -> AnotherService.class.equals(i))));
 	}
 
 	@Test
-	void scan_ThrowsKybInfrastructureException_IfSomethingWentWrongDuringScanning()
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+	void scanWithFilter_ThrowsIllegalArgumentException_IfGivenRootClassIsNull() {
 		// given
-		class InnerClassToCauseException {
-		}
-		Class<?> rootClass = InnerClassToCauseException.class;
+		Class<?> rootClass = null;
+		Predicate<Class<?>> filter = (Predicate<Class<?>>) ((c) -> true);
 
 		// when
-		KybInfrastructureException thrownException =
-				assertThrows(KybInfrastructureException.class, () -> underTest.scan(rootClass));
-
-		// then
-		assertEquals(String.format("Scanning is not successful & rootClass: %s",
-				InnerClassToCauseException.class.getName()), thrownException.getMessage());
-	}
-
-	@ParameterizedTest
-	@MethodSource("invalidScanningParameterProvider")
-	void scan_ThrowsIllegalArgumentException_IfGivenParametersAreNotValid(Class<?> rootClass,
-			Predicate<Class<?>> filter, String expectedExceptionMessage) {
-		// given & when
 		IllegalArgumentException thrownException =
 				assertThrows(IllegalArgumentException.class, () -> underTest.scan(rootClass, filter));
 
 		// then
-		assertEquals(thrownException.getMessage(), expectedExceptionMessage);
-	}
-
-	private static Stream<Arguments> invalidScanningParameterProvider() {
-		return Stream.of(
-				Arguments.of(null, (Predicate<Class<?>>) ((c) -> true), "rootClass cannot be null!"),
-				Arguments.of(ScannerImplTest.class, null, "filter cannot be null!"));
+		assertEquals("rootClass cannot be null!", thrownException.getMessage());
 	}
 
 	@Test
-	void scan_ReturnsClassInstancesOfClassesInThePathOfRootClassOrUnderThePathOfRootClassByFilteringByGivenFilter() {
+	void scanWithFilter_ThrowsIllegalArgumentException_IfGivenFilterIsNull() {
 		// given
 		Class<?> rootClass = ScannerImplTest.class;
+		Predicate<Class<?>> filter = null;
 
 		// when
-		Set<Class<?>> actualResult = underTest.scan(rootClass, c -> !c.isLocalClass());
+		IllegalArgumentException thrownException =
+				assertThrows(IllegalArgumentException.class, () -> underTest.scan(rootClass, filter));
 
 		// then
-		assertEquals(1, actualResult.size());
-		assertTrue(actualResult.stream().anyMatch(c -> ScannerImplTest.class.equals(c)));
+		assertEquals("filter cannot be null!", thrownException.getMessage());
+	}
+
+	@Test
+	void scanWithFilter_ReturnsClassInstancesOfClassesInThePathOfRootClassOrUnderThePathOfRootClassByFilteringByGivenFilter() {
+		// given
+		Class<?> rootClass = SomeService.class;
+
+		// when
+		Set<Class<?>> actualResult =
+				underTest.scan(rootClass, c -> !c.getSimpleName().equals(SomeService.class.getSimpleName())
+						&& !Stream.of(c.getInterfaces()).anyMatch(i -> SomeService.class.equals(i)));
+
+		// then
+		assertEquals(2, actualResult.size());
+		assertTrue(actualResult.stream().anyMatch(c -> AnotherService.class.equals(c)));
 	}
 
 }
