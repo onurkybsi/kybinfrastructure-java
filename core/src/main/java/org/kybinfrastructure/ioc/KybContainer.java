@@ -9,17 +9,17 @@ import java.util.Set;
  * <i>KybInfrastructure</i>.
  * </p>
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 public final class KybContainer {
 
-	private static final Scanner SCANNER = new ScannerImpl();
+	private static final Scanner SCANNER = new ScannerClassgraphImpl();
 	private static final DependencyResolver RESOLVER = new DependencyResolverImpl();
 
 	private final Container container;
 
 	KybContainer(Class<?> rootClass) {
-		Set<Class<?>> classesToInit = SCANNER.scan(rootClass, KybContainer::classLoadingFilter);
+		Set<Class<?>> classesToInit = SCANNER.scan(rootClass);
 		Set<ManagedClass> managedClasses = RESOLVER.resolve(classesToInit);
 		this.container = Container.build(managedClasses);
 		this.container.init();
@@ -37,11 +37,6 @@ public final class KybContainer {
 	 */
 	public <T> T getImpl(Class<T> classInstance) {
 		return container.getImpl(classInstance);
-	}
-
-	private static boolean classLoadingFilter(Class<?> classToLoad) {
-		return !classToLoad.isLocalClass() && !classToLoad.isMemberClass()
-				&& classToLoad.getAnnotation(Impl.class) != null;
 	}
 
 }

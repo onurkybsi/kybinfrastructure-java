@@ -5,7 +5,7 @@ import java.lang.reflect.Constructor;
 /**
  * Internal wrapper for the types which are managed by {@link KybContainer}
  */
-class ManagedClass {
+final class ManagedClass {
 
 	private final Class<?> clazz;
 	private final Constructor<?> ctr;

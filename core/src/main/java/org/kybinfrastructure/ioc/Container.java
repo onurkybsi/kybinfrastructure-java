@@ -16,9 +16,9 @@ import java.util.Set;
  * Component which handles the logic of {@link KybContainer} related with initializing the managed
  * class and serving them
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
-class Container {
+final class Container {
 
 	private final Map<Class<?>, ManagedClass> managedClasses;
 	private final HashMap<Class<?>, Object> instances = new HashMap<>();
