@@ -4,7 +4,7 @@ package org.kybinfrastructure.exception;
  * {@link KybInfrastructureException} exception which is used for the cases which are totally not
  * excepted.
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 public class UnexpectedException extends KybInfrastructureException {
 

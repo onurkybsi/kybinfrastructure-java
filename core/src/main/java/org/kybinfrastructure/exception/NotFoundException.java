@@ -3,7 +3,7 @@ package org.kybinfrastructure.exception;
 /**
  * {@link KybInfrastructureException} exception which is used for the data which cannot be found.
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 public class NotFoundException extends KybInfrastructureException {
 

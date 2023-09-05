@@ -6,7 +6,7 @@ import java.util.Set;
 /**
  * Represents the API which resolves the dependencies between the components
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 interface DependencyResolver {
 

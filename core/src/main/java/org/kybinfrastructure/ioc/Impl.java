@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Annotation which specifies that the class is loaded by {@link KybContainer}.
  * </p>
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

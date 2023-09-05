@@ -3,7 +3,7 @@ package org.kybinfrastructure.exception;
 /**
  * Represents thrown exceptions because of unexpected data invalidity.
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 public class InvalidDataException extends KybInfrastructureException {
 

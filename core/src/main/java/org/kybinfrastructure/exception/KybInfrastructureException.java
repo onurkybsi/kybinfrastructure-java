@@ -3,7 +3,7 @@ package org.kybinfrastructure.exception;
 /**
  * Base runtime exception of <i>KybInfrastructure</i> framework.
  * 
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 public class KybInfrastructureException extends RuntimeException {
 

@@ -5,7 +5,7 @@ import org.kybinfrastructure.utils.validation.Assertions;
 /**
  * Builder for {@link KybContainer}.
  *
- * @author Onur Kayabasi (onurbpm@outlook.com)
+ * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
 public final class KybContainerBuilder {
 
