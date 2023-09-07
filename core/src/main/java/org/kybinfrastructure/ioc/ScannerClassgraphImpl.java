@@ -15,18 +15,16 @@ final class ScannerClassgraphImpl implements Scanner {
   public Set<Class<?>> scan(Class<?> rootClass) {
     try (ScanResult scanResult =
         new ClassGraph().enableAllInfo().acceptPackages(rootClass.getPackageName()).scan()) {
-      ClassInfoList classInfoWithImplAnnotation =
+      ClassInfoList classInfoWithInjectorSuper =
           scanResult.getClassesWithAnnotation(Impl.class.getName());
 
-      Set<Class<?>> scannedClasses = new HashSet<>();
-      for (int i = 0; i < classInfoWithImplAnnotation.size(); i++) {
-        scannedClasses.add(classInfoWithImplAnnotation.get(i).loadClass());
+      Set<Class<?>> injectorClasses = new HashSet<>();
+      for (int i = 0; i < classInfoWithInjectorSuper.size(); i++) {
+        injectorClasses.add(classInfoWithInjectorSuper.get(i).loadClass());
       }
-      return scannedClasses;
+      return injectorClasses;
     } catch (Exception e) {
-      throw new KybInfrastructureException(
-          "Class path scanning by the given root class(%s) is unsucessful!".formatted(rootClass),
-          e);
+      throw new KybInfrastructureException("Injector couldn't be extracted!", e);
     }
   }
 
