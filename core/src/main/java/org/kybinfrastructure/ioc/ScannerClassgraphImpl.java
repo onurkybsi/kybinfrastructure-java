@@ -12,19 +12,19 @@ final class ScannerClassgraphImpl implements Scanner {
   ScannerClassgraphImpl() {}
 
   @Override
-  public Set<Class<?>> scan(Class<?> rootClass) {
+  public Set<Class<? extends Injector>> scan(Class<?> rootClass) {
     try (ScanResult scanResult =
         new ClassGraph().enableAllInfo().acceptPackages(rootClass.getPackageName()).scan()) {
-      ClassInfoList classInfoWithInjectorSuper =
-          scanResult.getClassesWithAnnotation(Impl.class.getName());
+      ClassInfoList classInfoWithInjectorSuper = scanResult.getClassesImplementing(Injector.class);
 
-      Set<Class<?>> injectorClasses = new HashSet<>();
+      Set<Class<? extends Injector>> injectorClasses = new HashSet<>();
       for (int i = 0; i < classInfoWithInjectorSuper.size(); i++) {
-        injectorClasses.add(classInfoWithInjectorSuper.get(i).loadClass());
+        injectorClasses
+            .add((Class<? extends Injector>) classInfoWithInjectorSuper.get(i).loadClass());
       }
       return injectorClasses;
     } catch (Exception e) {
-      throw new KybInfrastructureException("Injector couldn't be extracted!", e);
+      throw new KybInfrastructureException("Injectors couldn't be extracted!", e);
     }
   }
 

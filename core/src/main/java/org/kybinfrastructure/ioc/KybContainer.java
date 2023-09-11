@@ -1,5 +1,8 @@
 package org.kybinfrastructure.ioc;
 
+import org.kybinfrastructure.exception.KybInfrastructureException;
+import java.lang.reflect.Constructor;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -18,8 +21,26 @@ public final class KybContainer {
 	// private final Container container;
 
 	KybContainer(Class<?> rootClass) {
-		Set<Class<?>> injectorClasses = SCANNER.scan(rootClass);
+		Set<Class<? extends Injector>> injectorClasses = SCANNER.scan(rootClass);
+		Set<Class<?>> classesToManage = extractClassesToManage(injectorClasses);
+	}
 
+	private static Set<Class<?>> extractClassesToManage(
+			Set<Class<? extends Injector>> injectorClasses) {
+		HashSet<Class<?>> classesToManage = new HashSet<>();
+
+		try {
+			for (Class<? extends Injector> injectorClass : injectorClasses) {
+				// TODO: Only returns public constructor, this needs to be solved, we should let the client
+				// to define a nonpublic one.
+				Constructor<? extends Injector> defaultCtor = injectorClass.getConstructor();
+				return null;
+			}
+		} catch (Exception e) {
+			throw new KybInfrastructureException("Managed classes extraction is unsuccessful!", e);
+		}
+
+		return classesToManage;
 	}
 
 	// /**
