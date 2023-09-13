@@ -11,8 +11,8 @@ final class ManagedClass {
 	private final Constructor<?> ctr;
 	private final Class<?>[] ctrParams;
 
-	ManagedClass(Class<?> classToManage, Constructor<?> constructor) {
-		this.clazz = classToManage;
+	ManagedClass(Class<?> clazz, Constructor<?> constructor) {
+		this.clazz = clazz;
 		this.ctr = constructor;
 		this.ctrParams = constructor.getParameterTypes();
 	}
