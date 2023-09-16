@@ -3,18 +3,16 @@ package org.kybinfrastructure.ioc;
 import org.kybinfrastructure.exception.NotFoundException;
 import org.kybinfrastructure.exception.UnexpectedException;
 import org.kybinfrastructure.utils.validation.Assertions;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Component which handles the logic of {@link KybContainer} related with
- * initializing the managed classes and serving them.
+ * Component which handles the logic of {@link KybContainer} related with initializing the managed
+ * classes and serving them.
  * 
  * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */
@@ -55,7 +53,7 @@ final class Container {
 		}
 	}
 
-	<T> T getImpl(Class<T> classInstance) {
+	<T> T get(Class<T> classInstance) {
 		Assertions.notNull(classInstance, "classInstance cannot be null!");
 
 		Object instance = findManagedInstance(classInstance);
@@ -89,13 +87,8 @@ final class Container {
 			return instance;
 		}
 
-		return managedClasses.keySet()
-				.stream()
-				.filter(m -> Arrays.stream(m.getInterfaces()).anyMatch(i -> i.equals(assignableTypeOfInstance))
-						|| m.getSuperclass().equals(assignableTypeOfInstance))
-				.findFirst()
-				.map(instances::get)
-				.orElse(null);
+		return managedClasses.keySet().stream().filter(assignableTypeOfInstance::isAssignableFrom)
+				.findFirst().map(instances::get).orElse(null);
 	}
 
 }

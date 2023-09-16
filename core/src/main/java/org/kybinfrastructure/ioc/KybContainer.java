@@ -1,8 +1,8 @@
 package org.kybinfrastructure.ioc;
 
+import org.kybinfrastructure.exception.InvalidDataException;
 import org.kybinfrastructure.exception.KybInfrastructureException;
 import org.kybinfrastructure.exception.NotFoundException;
-
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,8 +10,7 @@ import java.util.logging.Logger;
 
 /**
  * <p>
- * <a href="https://en.wikipedia.org/wiki/Inversion_of_control">IoC
- * container</a> solution of
+ * <a href="https://en.wikipedia.org/wiki/Inversion_of_control">IoC container</a> solution of
  * <i>KybInfrastructure</i>.
  * </p>
  * 
@@ -31,6 +30,7 @@ public final class KybContainer {
 		Set<Class<?>> classesToManage = extractClassesToManage(injectorClasses);
 		Set<ManagedClass> managedClasses = RESOLVER.resolve(classesToManage);
 		container = Container.build(managedClasses);
+		container.init();
 	}
 
 	/**
@@ -38,17 +38,16 @@ public final class KybContainer {
 	 * Returns the <i>KybContainer</i> initialized instance of the given type.
 	 * </p>
 	 *
-	 * @param <T>           type of the instance
+	 * @param <T> type of the instance
 	 * @param classInstance class instance of the type
 	 * @return <i>KybContainer</i> initialized instance
-	 * @throws NotFoundException if no instance found in the container by given
-	 *                           type
+	 * @throws NotFoundException if no instance found in the container by given type
 	 */
-	public <T> T getImpl(Class<T> classInstance) {
-		return container.getImpl(classInstance);
+	public <T> T get(Class<T> classInstance) {
+		return container.get(classInstance);
 	}
 
-	@SuppressWarnings({ "java:S3011" })
+	@SuppressWarnings({"java:S3011"})
 	private static Set<Class<?>> extractClassesToManage(
 			Set<Class<? extends Injector>> injectorClasses) {
 		HashSet<Class<?>> classesToManage = new HashSet<>();
@@ -61,8 +60,7 @@ public final class KybContainer {
 				Injector injectorInstance = defaultCtor.newInstance();
 				Iterable<Class<?>> injectedClasses = injectorInstance.inject();
 				for (Class<?> injectedClass : injectedClasses) {
-					// TODO: Assert whether all the injected class are class, not something
-					// different(like an interface or maybe even nested classes ?).
+					assertManageable(injectedClass);
 					classesToManage.add(injectedClass);
 				}
 			}
@@ -74,6 +72,24 @@ public final class KybContainer {
 		}
 
 		return classesToManage;
+	}
+
+	private static void assertManageable(Class<?> injectedClass) {
+		if (injectedClass.isInterface()) {
+			throw new InvalidDataException("An interface cannot be injected: " + injectedClass.getName());
+		}
+		if (injectedClass.isMemberClass()) {
+			throw new InvalidDataException(
+					"A member class cannot be injected: " + injectedClass.getName());
+		}
+		if (injectedClass.isLocalClass()) {
+			throw new InvalidDataException(
+					"A local class cannot be injected: " + injectedClass.getName());
+		}
+		if (injectedClass.isAnonymousClass()) {
+			throw new InvalidDataException(
+					"An anonymous class cannot be injected: " + injectedClass.getName());
+		}
 	}
 
 }
