@@ -1,9 +1,10 @@
 package org.kybinfrastructure.ioc;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 
 /**
- * Internal wrapper for the types which are managed by {@link KybContainer}
+ * Internal wrapper for the classes which are managed by {@link KybContainer}
  */
 final class ManagedClass {
 
@@ -17,16 +18,22 @@ final class ManagedClass {
 		this.ctrParams = constructor.getParameterTypes();
 	}
 
-	public Class<?> getClazz() {
+	Class<?> getClazz() {
 		return clazz;
 	}
 
-	public Constructor<?> getCtr() {
+	Constructor<?> getCtr() {
 		return ctr;
 	}
 
-	public Class<?>[] getCtrParams() {
+	Class<?>[] getCtrParams() {
 		return ctrParams;
+	}
+
+	@Override
+	public String toString() {
+		return "ManagedClass(clazz=%s,ctr=%s,ctrParams=%s)".formatted(clazz, ctr,
+				Arrays.toString(ctrParams));
 	}
 
 }

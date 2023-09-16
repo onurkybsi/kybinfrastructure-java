@@ -2,14 +2,15 @@ package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exception.InvalidDataException;
 import org.kybinfrastructure.exception.UnexpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Default implementation for {@link DependencyResolver}
- */
-class DependencyResolverImpl implements DependencyResolver {
+final class DependencyResolverImpl implements DependencyResolver {
+
+	private static Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
 
 	@Override
 	public Set<ManagedClass> resolve(Set<Class<?>> classesToManage) {
@@ -18,6 +19,7 @@ class DependencyResolverImpl implements DependencyResolver {
 		return managedClasses;
 	}
 
+	@SuppressWarnings({"java:S3011"})
 	private static Set<ManagedClass> initManagedClasses(Set<Class<?>> classesToManage) {
 		Set<ManagedClass> initialized = new HashSet<>();
 
@@ -27,18 +29,20 @@ class DependencyResolverImpl implements DependencyResolver {
 						"Managed classes should have 'only' 1 constructor(%s has %s)", classToManage.getName(),
 						classToManage.getConstructors().length);
 			}
-
 			Constructor<?> ctr = classToManage.getDeclaredConstructors()[0];
 			ctr.setAccessible(true);
+
 			for (Class<?> parameterType : ctr.getParameterTypes()) {
 				if (classesToManage.stream().noneMatch(parameterType::isAssignableFrom)) {
 					throw new InvalidDataException(
-							"Managed class has a nonmanaged class constructor parameter: %s -> %s",
-							classToManage.getSimpleName(), parameterType.getSimpleName());
+							"Managed class has a nonmanaged class as a constructor parameter: %s has %s",
+							classToManage.getName(), parameterType.getName());
 				}
 			}
 
-			initialized.add(new ManagedClass(classToManage, ctr));
+			ManagedClass managedClass = new ManagedClass(classToManage, ctr);
+			LOGGER.debug("{} is being managed...", managedClass);
+			initialized.add(managedClass);
 		}
 
 		return initialized;

@@ -1,12 +1,13 @@
 package org.kybinfrastructure.ioc;
 
 import org.kybinfrastructure.exception.InvalidDataException;
-import org.kybinfrastructure.exception.KybInfrastructureException;
 import org.kybinfrastructure.exception.NotFoundException;
+import org.kybinfrastructure.exception.UnexpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * <p>
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
  */
 public final class KybContainer {
 
-	private static final Logger LOGGER = Logger.getLogger(KybContainer.class.getName());
+	private static Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
 
 	private static final Scanner SCANNER = new ScannerClassgraphImpl();
 	private static final DependencyResolver RESOLVER = new DependencyResolverImpl();
@@ -26,11 +27,15 @@ public final class KybContainer {
 	private final Container container;
 
 	KybContainer(Class<?> rootClass) {
+		LOGGER.debug("KybContainer is being built...");
+
 		Set<Class<? extends Injector>> injectorClasses = SCANNER.scan(rootClass);
 		Set<Class<?>> classesToManage = extractClassesToManage(injectorClasses);
 		Set<ManagedClass> managedClasses = RESOLVER.resolve(classesToManage);
 		container = Container.build(managedClasses);
 		container.init();
+
+		LOGGER.debug("KybContainer was built!");
 	}
 
 	/**
@@ -56,39 +61,39 @@ public final class KybContainer {
 			for (Class<? extends Injector> injectorClass : injectorClasses) {
 				Constructor<? extends Injector> defaultCtor = injectorClass.getDeclaredConstructor();
 				defaultCtor.setAccessible(true);
-
 				Injector injectorInstance = defaultCtor.newInstance();
-				Iterable<Class<?>> injectedClasses = injectorInstance.inject();
-				for (Class<?> injectedClass : injectedClasses) {
-					assertManageable(injectedClass);
-					classesToManage.add(injectedClass);
+
+				Iterable<Class<?>> classesToInject = injectorInstance.inject();
+				for (Class<?> classToInject : classesToInject) {
+					assertManageable(classToInject);
+					LOGGER.debug("{} was injected!", classToInject.getName());
+					classesToManage.add(classToInject);
 				}
 			}
 		} catch (NoSuchMethodException e) {
-			throw new KybInfrastructureException("Injector class should have 'only' default constructor!",
-					e);
+			throw new InvalidDataException("Injector class should have 'only' default constructor!", e);
 		} catch (Exception e) {
-			throw new KybInfrastructureException("Managed classes extraction is unsuccessful!", e);
+			throw new UnexpectedException("Managed classes couldn't be extraced!", e);
 		}
 
 		return classesToManage;
 	}
 
-	private static void assertManageable(Class<?> injectedClass) {
-		if (injectedClass.isInterface()) {
-			throw new InvalidDataException("An interface cannot be injected: " + injectedClass.getName());
+	private static void assertManageable(Class<?> classToInject) {
+		if (classToInject.isInterface()) {
+			throw new InvalidDataException("An interface cannot be injected: " + classToInject.getName());
 		}
-		if (injectedClass.isMemberClass()) {
+		if (classToInject.isMemberClass()) {
 			throw new InvalidDataException(
-					"A member class cannot be injected: " + injectedClass.getName());
+					"A member class cannot be injected: " + classToInject.getName());
 		}
-		if (injectedClass.isLocalClass()) {
+		if (classToInject.isLocalClass()) {
 			throw new InvalidDataException(
-					"A local class cannot be injected: " + injectedClass.getName());
+					"A local class cannot be injected: " + classToInject.getName());
 		}
-		if (injectedClass.isAnonymousClass()) {
+		if (classToInject.isAnonymousClass()) {
 			throw new InvalidDataException(
-					"An anonymous class cannot be injected: " + injectedClass.getName());
+					"An anonymous class cannot be injected: " + classToInject.getName());
 		}
 	}
 
