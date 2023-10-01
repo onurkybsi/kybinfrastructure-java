@@ -13,8 +13,6 @@ final class ScannerClassgraphImpl implements Scanner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
 
-  ScannerClassgraphImpl() {}
-
   @Override
   @SuppressWarnings({"unchecked"})
   public Set<Class<? extends Injector>> scan(Class<?> rootClass) {

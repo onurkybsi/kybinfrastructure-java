@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
 /**
- * Internal wrapper for the classes which are managed by {@link KybContainer}
+ * Wrapper for the classes which are managed by {@link KybContainer}.
  */
 final class ManagedClass {
 
