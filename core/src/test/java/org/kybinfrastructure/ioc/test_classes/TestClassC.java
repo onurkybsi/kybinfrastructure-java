@@ -1,5 +1,11 @@
 package org.kybinfrastructure.ioc.test_classes;
 
 public class TestClassC {
-  public TestClassC(TestClassA testClassA) {}
+
+  private final TestClassA testClassA;
+
+  public TestClassC(TestClassA testClassA) {
+    this.testClassA = testClassA;
+  }
+
 }
