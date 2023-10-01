@@ -19,15 +19,14 @@ import java.util.Set;
  */
 public final class KybContainer {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
 	private static final Scanner SCANNER = new ScannerClassgraphImpl();
 	private static final DependencyResolver RESOLVER = new DependencyResolverImpl();
 
 	private final Container container;
 
 	KybContainer(Class<?> rootClass) {
-		LOGGER.debug("KybContainer is being built...");
+		LOGGER.debug("KybContainer is being built with root class: {}", rootClass);
 
 		Set<Class<? extends Injector>> injectorClasses = SCANNER.scan(rootClass);
 		Set<Class<?>> classesToManage = extractClassesToManage(injectorClasses);
@@ -36,6 +35,10 @@ public final class KybContainer {
 		container.init();
 
 		LOGGER.debug("KybContainer was built!");
+	}
+
+	public static KybContainerBuilder builder(Class<?> rootClass) {
+		return new KybContainerBuilder(rootClass);
 	}
 
 	/**
@@ -50,6 +53,15 @@ public final class KybContainer {
 	 */
 	public <T> T get(Class<T> classInstance) {
 		return container.get(classInstance);
+	}
+
+	/**
+	 * Returns all the managed classes.
+	 *
+	 * @return {@code KybContainer} managed classes
+	 */
+	public Set<Class<?>> getManagedClasses() {
+		return container.getManagedClasses();
 	}
 
 	@SuppressWarnings({"java:S3011"})

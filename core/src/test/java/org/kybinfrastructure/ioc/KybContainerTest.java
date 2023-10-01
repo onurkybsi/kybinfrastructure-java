@@ -17,7 +17,7 @@ class KybContainerTest {
 
   @Test
   void build() {
-    KybContainer container = KybContainerBuilder.build(SomeService.class);
+    KybContainer container = KybContainer.builder(SomeService.class).build();
     assertNotNull(container.get(SomeService.class));
     assertNotNull(container.get(AnotherService.class));
   }

@@ -70,6 +70,10 @@ final class Container {
 				"Initiated instance couldn't be cast to the actual type: " + classInstance.getSimpleName());
 	}
 
+	Set<Class<?>> getManagedClasses() {
+		return managedClasses.keySet();
+	}
+
 	private Object[] getConstructorParameters(Constructor<?> ctor) {
 		Class<?>[] parameterTypes = ctor.getParameterTypes();
 
