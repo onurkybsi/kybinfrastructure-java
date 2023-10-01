@@ -2,7 +2,7 @@ package org.kybinfrastructure.exception;
 
 /**
  * {@link KybInfrastructureException} exception which is used for the cases which are totally not
- * excepted.
+ * expected.
  * 
  * @author Onur Kayabasi (o.kayabasi@outlook.com)
  */

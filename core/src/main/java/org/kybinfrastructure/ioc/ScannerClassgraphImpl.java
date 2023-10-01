@@ -11,7 +11,7 @@ import io.github.classgraph.ScanResult;
 
 final class ScannerClassgraphImpl implements Scanner {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
 
   ScannerClassgraphImpl() {}
 
@@ -20,12 +20,13 @@ final class ScannerClassgraphImpl implements Scanner {
   public Set<Class<? extends Injector>> scan(Class<?> rootClass) {
     try (ScanResult scanResult =
         new ClassGraph().enableAllInfo().acceptPackages(rootClass.getPackageName()).scan()) {
-      ClassInfoList classInfoWithInjectorSuper = scanResult.getClassesImplementing(Injector.class);
+      ClassInfoList classInfoListWithInjectorSuper =
+          scanResult.getClassesImplementing(Injector.class);
 
       Set<Class<? extends Injector>> injectorClasses = new HashSet<>();
-      for (int i = 0; i < classInfoWithInjectorSuper.size(); i++) {
+      for (int i = 0; i < classInfoListWithInjectorSuper.size(); i++) {
         Class<? extends Injector> injectorClass =
-            (Class<? extends Injector>) classInfoWithInjectorSuper.get(i).loadClass();
+            (Class<? extends Injector>) classInfoListWithInjectorSuper.get(i).loadClass();
 
         LOGGER.debug("{} injector class loaded!", injectorClass);
         injectorClasses.add(injectorClass);
