@@ -8,7 +8,7 @@ package org.kybinfrastructure.ioc;
 public interface Injector {
 
   /**
-   * Returns the class instances to be injected into the {@link KybContainer}
+   * Returns the class instances to be injected into the {@link KybContainer}.
    *
    * @return the class instances to be injected
    */
