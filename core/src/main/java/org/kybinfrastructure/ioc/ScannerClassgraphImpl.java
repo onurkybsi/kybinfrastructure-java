@@ -26,7 +26,7 @@ final class ScannerClassgraphImpl implements Scanner {
         Class<? extends Injector> injectorClass =
             (Class<? extends Injector>) classInfoListWithInjectorSuper.get(i).loadClass();
 
-        LOGGER.debug("{} injector class loaded!", injectorClass);
+        LOGGER.debug("{} injector class was loaded!", injectorClass);
         injectorClasses.add(injectorClass);
       }
 
