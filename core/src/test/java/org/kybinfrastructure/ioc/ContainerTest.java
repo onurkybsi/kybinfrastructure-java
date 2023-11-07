@@ -5,15 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.kybinfrastructure.exception.UnexpectedException;
 import org.kybinfrastructure.ioc.test_classes.TestClassA;
 import org.kybinfrastructure.ioc.test_classes.TestClassC;
 import org.kybinfrastructure.ioc.test_classes.TestClassF;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 class ContainerTest {
 

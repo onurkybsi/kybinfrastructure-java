@@ -1,13 +1,19 @@
 package org.kybinfrastructure.ioc;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.kybinfrastructure.exception.InvalidDataException;
 import org.kybinfrastructure.exception.NotFoundException;
 import org.kybinfrastructure.exception.UnexpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.lang.reflect.Constructor;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * <p>
@@ -28,15 +34,16 @@ public final class KybContainer {
 	KybContainer(Class<?> rootClass) {
 		LOGGER.debug("KybContainer is being built with root class: {}", rootClass);
 
-		Set<Class<? extends Injector>> injectorClasses = SCANNER.scan(rootClass);
-		Set<Class<?>> classesToManage = extractClassesToManage(injectorClasses);
-		Set<ManagedClass> managedClasses = RESOLVER.resolve(classesToManage);
-		container = Container.build(managedClasses);
+		Set<Class<?>> injectorClasses = SCANNER.scan(rootClass);
+		Map<Object, Set<Method>> injectionMethods = extractInjectionMethods(injectorClasses);
+		Set<ManagedClass> managedClasses = RESOLVER.resolve(injectionMethods);
+		container = new Container(managedClasses);
 		container.init();
 
 		LOGGER.debug("KybContainer was built!");
 	}
 
+	// #region Public API
 	public static KybContainerBuilder builder(Class<?> rootClass) {
 		return new KybContainerBuilder(rootClass);
 	}
@@ -63,49 +70,94 @@ public final class KybContainer {
 	public Set<Class<?>> getManagedClasses() {
 		return container.getManagedClasses();
 	}
+	// #endregion
 
-	@SuppressWarnings({"java:S3011"})
-	private static Set<Class<?>> extractClassesToManage(
-			Set<Class<? extends Injector>> injectorClasses) {
-		HashSet<Class<?>> classesToManage = new HashSet<>();
+	private static Map<Object, Set<Method>> extractInjectionMethods(Set<Class<?>> injectorClasses) {
+		Map<Object, Set<Method>> injectionMethods = new HashMap<>();
 
-		try {
-			for (Class<? extends Injector> injectorClass : injectorClasses) {
-				Constructor<? extends Injector> defaultCtor = injectorClass.getDeclaredConstructor();
-				defaultCtor.setAccessible(true);
-				Injector injectorInstance = defaultCtor.newInstance();
+		for (Class<?> injectorClass : injectorClasses) {
+			assertInjectorClassValid(injectorClass);
 
-				Iterable<Class<?>> classesToInject = injectorInstance.inject();
-				for (Class<?> classToInject : classesToInject) {
-					assertManageable(classToInject);
-					LOGGER.debug("{} was injected!", classToInject.getName());
-					classesToManage.add(classToInject);
+			Set<Method> methods = new HashSet<>();
+			for (Method injectorMethod : injectorClass.getDeclaredMethods()) {
+				if (!injectorMethod.isAnnotationPresent(Injection.class)) {
+					continue;
 				}
+				assertInjectionMethodValid(injectorMethod);
+
+				methods.add(injectorMethod);
 			}
-		} catch (NoSuchMethodException e) {
-			throw new InvalidDataException("Injector class should have 'only' default constructor!", e);
-		} catch (Exception e) {
-			throw new UnexpectedException("Managed classes couldn't be extraced!", e);
+
+			injectionMethods.put(buildInjectorClassInstance(injectorClass), methods);
 		}
 
-		return classesToManage;
+		return injectionMethods;
 	}
 
-	private static void assertManageable(Class<?> classToInject) {
-		if (classToInject.isInterface()) {
-			throw new InvalidDataException("An interface cannot be injected: " + classToInject.getName());
+	private static Object buildInjectorClassInstance(Class<?> injectorClass) {
+		try {
+			injectorClass.getConstructor().setAccessible(true);
+			return injectorClass.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new UnexpectedException("Injection methods couldn't be extracted!", e);
 		}
-		if (classToInject.isMemberClass()) {
+	}
+
+	private static void assertInjectorClassValid(Class<?> injectorClass) {
+		if (injectorClass.isInterface()) {
 			throw new InvalidDataException(
-					"A member class cannot be injected: " + classToInject.getName());
+					"An interface cannot be an injector: " + injectorClass.getName());
 		}
-		if (classToInject.isLocalClass()) {
+		if (Modifier.isAbstract(injectorClass.getModifiers())) {
 			throw new InvalidDataException(
-					"A local class cannot be injected: " + classToInject.getName());
+					"An abstract class cannot be an injector: " + injectorClass.getName());
 		}
-		if (classToInject.isAnonymousClass()) {
+		if (injectorClass.isMemberClass()) {
 			throw new InvalidDataException(
-					"An anonymous class cannot be injected: " + classToInject.getName());
+					"A member class cannot be an injector: " + injectorClass.getName());
+		}
+		if (injectorClass.isLocalClass()) {
+			throw new InvalidDataException(
+					"A local class cannot be an injector: " + injectorClass.getName());
+		}
+		if (injectorClass.isAnonymousClass()) {
+			throw new InvalidDataException(
+					"An anonymous class cannot be an injector: " + injectorClass.getName());
+		}
+
+		Constructor<?>[] ctors = injectorClass.getDeclaredConstructors();
+		if (ctors.length != 1) {
+			throw new InvalidDataException(
+					"An injector class can only have default constructor: " + injectorClass.getName());
+		}
+		if (ctors[0].getParameterCount() != 0) {
+			throw new InvalidDataException(
+					"An injector class can only have default constructor: " + injectorClass.getName());
+		}
+	}
+
+	private static void assertInjectionMethodValid(Method injectorMethod) {
+		if (Modifier.isPrivate(injectorMethod.getModifiers())) {
+			throw new InvalidDataException(
+					"An injection method cannot be private: " + injectorMethod.getName());
+		}
+		if (Modifier.isProtected(injectorMethod.getModifiers())) {
+			throw new InvalidDataException(
+					"An injection method cannot be protected: " + injectorMethod.getName());
+		}
+		if (Modifier.isStatic(injectorMethod.getModifiers())) {
+			throw new InvalidDataException(
+					"An injection method cannot be static: " + injectorMethod.getName());
+		}
+		if (injectorMethod.getReturnType().isPrimitive()) {
+			throw new InvalidDataException(
+					"An injection method cannot return primitive type: " + injectorMethod.getName());
+		}
+		if (Stream.of(injectorMethod.getParameters()).anyMatch(p -> p.getType().isPrimitive())) {
+			throw new InvalidDataException(
+					"An injection method cannot have primitive types for parameters: "
+							+ injectorMethod.getName());
 		}
 	}
 

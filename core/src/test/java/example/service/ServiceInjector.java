@@ -1,17 +1,17 @@
 package example.service;
 
+import org.kybinfrastructure.ioc.Injection;
 import org.kybinfrastructure.ioc.Injector;
+import example.service.sub.AnotherService;
 
-import java.util.List;
+@Injector
+class ServiceInjector {
 
-class ServiceInjector implements Injector {
+  private ServiceInjector() {}
 
-  private ServiceInjector() {
-  }
-
-  @Override
-  public Iterable<Class<?>> inject() {
-    return List.of(SomeServiceImpl.class);
+  @Injection
+  SomeServiceImpl someServiceImpl(AnotherService anotherService) {
+    return new SomeServiceImpl(anotherService);
   }
 
 }

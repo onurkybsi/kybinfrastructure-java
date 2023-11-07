@@ -4,6 +4,6 @@ import java.util.Set;
 
 interface Scanner {
 
-	Set<Class<? extends Injector>> scan(Class<?> rootClass);
+	Set<Class<?>> scan(Class<?> rootClass);
 
 }
