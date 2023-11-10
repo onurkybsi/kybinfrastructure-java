@@ -6,6 +6,6 @@ import java.util.Set;
 
 interface DependencyResolver {
 
-	Set<ManagedClass> resolve(Map<Object, Set<Method>> injectionMethods);
+	Set<ManagedClass> resolve(Map<Object, Set<Method>> injectorsWithInjectionMethods);
 
 }

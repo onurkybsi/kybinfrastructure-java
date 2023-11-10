@@ -4,8 +4,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -35,8 +35,9 @@ public final class KybContainer {
 		LOGGER.debug("KybContainer is being built with root class: {}", rootClass);
 
 		Set<Class<?>> injectorClasses = SCANNER.scan(rootClass);
-		Map<Object, Set<Method>> injectionMethods = extractInjectionMethods(injectorClasses);
-		Set<ManagedClass> managedClasses = RESOLVER.resolve(injectionMethods);
+		Map<Object, Set<Method>> injectorsWithInjectionMethods =
+				extractInjectorsWithInjectionMethods(injectorClasses);
+		Set<ManagedClass> managedClasses = RESOLVER.resolve(injectorsWithInjectionMethods);
 		container = new Container(managedClasses);
 		container.init();
 
@@ -72,26 +73,27 @@ public final class KybContainer {
 	}
 	// #endregion
 
-	private static Map<Object, Set<Method>> extractInjectionMethods(Set<Class<?>> injectorClasses) {
-		Map<Object, Set<Method>> injectionMethods = new HashMap<>();
+	private static Map<Object, Set<Method>> extractInjectorsWithInjectionMethods(
+			Set<Class<?>> injectorClasses) {
+		Map<Object, Set<Method>> injectorsWithInjectionMethods = new LinkedHashMap<>();
 
 		for (Class<?> injectorClass : injectorClasses) {
 			assertInjectorClassValid(injectorClass);
 
-			Set<Method> methods = new HashSet<>();
+			Set<Method> injectionMethods = new LinkedHashSet<>();
 			for (Method injectorMethod : injectorClass.getDeclaredMethods()) {
-				if (!injectorMethod.isAnnotationPresent(Injection.class)) {
+				if (!injectorMethod.isAnnotationPresent(Injection.class))
 					continue;
-				}
 				assertInjectionMethodValid(injectorMethod);
 
-				methods.add(injectorMethod);
+				injectionMethods.add(injectorMethod);
 			}
 
-			injectionMethods.put(buildInjectorClassInstance(injectorClass), methods);
+			injectorsWithInjectionMethods.put(buildInjectorClassInstance(injectorClass),
+					injectionMethods);
 		}
 
-		return injectionMethods;
+		return injectorsWithInjectionMethods;
 	}
 
 	private static Object buildInjectorClassInstance(Class<?> injectorClass) {
@@ -137,27 +139,26 @@ public final class KybContainer {
 		}
 	}
 
-	private static void assertInjectionMethodValid(Method injectorMethod) {
-		if (Modifier.isPrivate(injectorMethod.getModifiers())) {
+	private static void assertInjectionMethodValid(Method injectionMethod) {
+		if (Modifier.isPrivate(injectionMethod.getModifiers())) {
 			throw new InvalidDataException(
-					"An injection method cannot be private: " + injectorMethod.getName());
+					"An injection method cannot be private: " + injectionMethod.getName());
 		}
-		if (Modifier.isProtected(injectorMethod.getModifiers())) {
+		if (Modifier.isProtected(injectionMethod.getModifiers())) {
 			throw new InvalidDataException(
-					"An injection method cannot be protected: " + injectorMethod.getName());
+					"An injection method cannot be protected: " + injectionMethod.getName());
 		}
-		if (Modifier.isStatic(injectorMethod.getModifiers())) {
+		if (Modifier.isStatic(injectionMethod.getModifiers())) {
 			throw new InvalidDataException(
-					"An injection method cannot be static: " + injectorMethod.getName());
+					"An injection method cannot be static: " + injectionMethod.getName());
 		}
-		if (injectorMethod.getReturnType().isPrimitive()) {
+		if (injectionMethod.getReturnType().isPrimitive()) {
 			throw new InvalidDataException(
-					"An injection method cannot return primitive type: " + injectorMethod.getName());
+					"An injection method cannot have primitive return type: " + injectionMethod.getName());
 		}
-		if (Stream.of(injectorMethod.getParameters()).anyMatch(p -> p.getType().isPrimitive())) {
-			throw new InvalidDataException(
-					"An injection method cannot have primitive types for parameters: "
-							+ injectorMethod.getName());
+		if (Stream.of(injectionMethod.getParameters()).anyMatch(p -> p.getType().isPrimitive())) {
+			throw new InvalidDataException("An injection method cannot have primitive parameters types: "
+					+ injectionMethod.getName());
 		}
 	}
 
