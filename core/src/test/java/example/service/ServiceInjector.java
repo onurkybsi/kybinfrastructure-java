@@ -5,9 +5,8 @@ import org.kybinfrastructure.ioc.Injector;
 import example.service.sub.AnotherService;
 
 @Injector
-class ServiceInjector {
-
-  private ServiceInjector() {}
+// public is not required, this was made public for testing purposes
+public class ServiceInjector {
 
   @Injection
   SomeServiceImpl someServiceImpl(AnotherService anotherService) {

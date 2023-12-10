@@ -4,9 +4,7 @@ import org.kybinfrastructure.ioc.Injection;
 import org.kybinfrastructure.ioc.Injector;
 
 @Injector
-class AnotherServiceInjector {
-
-  private AnotherServiceInjector() {}
+public class AnotherServiceInjector {
 
   @Injection
   AnotherServiceImpl anotherServiceImpl() {

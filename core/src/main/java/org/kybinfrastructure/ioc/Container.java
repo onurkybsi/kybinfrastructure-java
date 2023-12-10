@@ -1,5 +1,6 @@
 package org.kybinfrastructure.ioc;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,12 +53,12 @@ final class Container {
 							.cast(factoryMethod.invoke(injectorInstance, factoryMethodParams)));
 				}
 			}
-
-			LOGGER.trace("Container was initialized with {} instances!", managedInstances.size());
-			return this;
-		} catch (Exception e) {
+		} catch (IllegalAccessException | InvocationTargetException e) {
 			throw new UnexpectedException("Initialization is not successful!", e);
 		}
+
+		LOGGER.trace("Container was initialized with {} instances!", managedInstances.size());
+		return this;
 	}
 
 	<T> Optional<T> get(Class<T> classInstance) {

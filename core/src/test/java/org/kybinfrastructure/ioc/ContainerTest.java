@@ -1,168 +1,195 @@
 package org.kybinfrastructure.ioc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.Set;
+import org.junit.jupiter.api.Test;
+import org.kybinfrastructure.exception.InvalidDataException;
+import example.service.ServiceInjector;
+import example.service.SomeService;
+import example.service.SomeServiceImpl;
+import example.service.sub.AnotherService;
+import example.service.sub.AnotherServiceImpl;
+import example.service.sub.AnotherServiceInjector;
+
 class ContainerTest {
 
-    // @Test
-    // void container_Constructs_ManagedClasses_By_SortingThem_By_ConstructorParamNumber() {
-    // // given
-    // ManagedClass managedClassF =
-    // new ManagedClass(TestClassF.class, TestClassF.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassC =
-    // new ManagedClass(TestClassC.class, TestClassC.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassA =
-    // new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]);
+  @Test
+  @SuppressWarnings({"unchecked"})
+  void container_Constructs_ManagedClasses_By_SortingThem_By_FactoryMethodParamNumber()
+      throws Exception {
+    // given
+    var anotherServiceInjectionMethod =
+        AnotherServiceInjector.class.getDeclaredMethod("anotherServiceImpl");
+    anotherServiceInjectionMethod.setAccessible(true);
+    var anotherServiceManagedClass = new ManagedClass(AnotherServiceImpl.class,
+        new AnotherServiceInjector(), anotherServiceInjectionMethod);
+    var someServiceInjectionMethod =
+        ServiceInjector.class.getDeclaredMethod("someServiceImpl", AnotherService.class);
+    someServiceInjectionMethod.setAccessible(true);
+    var someServiceManagedClass =
+        new ManagedClass(SomeServiceImpl.class, new ServiceInjector(), someServiceInjectionMethod);
+    Set<ManagedClass> managedClasses = Set.of(someServiceManagedClass, anotherServiceManagedClass);
 
-    // // when
-    // Container underTest =
-    // new Container(new HashSet<>(List.of(managedClassF, managedClassC, managedClassA)));
+    // when
+    Container underTest = new Container(managedClasses);
 
-    // // then
-    // List<Class<?>> managedClasses = new ArrayList<>(underTest.getManagedClasses());
-    // assertEquals(3, managedClasses.size());
-    // assertEquals(TestClassA.class, managedClasses.get(0));
-    // assertEquals(TestClassC.class, managedClasses.get(1));
-    // assertEquals(TestClassF.class, managedClasses.get(2));
-    // }
+    // then
+    Field constructedManagedClassesField = Container.class.getDeclaredField("managedClasses");
+    constructedManagedClassesField.setAccessible(true);
+    var constructedManagedClasses =
+        (Map<Class<?>, ManagedClass>) constructedManagedClassesField.get(underTest);
+    assertEquals(2, constructedManagedClasses.size());
+    var constructedManagedClassesIterator = constructedManagedClasses.keySet().iterator();
+    assertEquals(AnotherServiceImpl.class, constructedManagedClassesIterator.next());
+    assertEquals(SomeServiceImpl.class, constructedManagedClassesIterator.next());
+  }
 
-    // @Test
-    // void init_Initializes_ManagedInstances() throws Exception {
-    // // given
-    // ManagedClass managedClassF =
-    // new ManagedClass(TestClassF.class, TestClassF.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassC =
-    // new ManagedClass(TestClassC.class, TestClassC.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassA =
-    // new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]);
-    // Container underTest =
-    // new Container(new HashSet<>(List.of(managedClassF, managedClassC, managedClassA)));
+  @Test
+  void init_Initializes_ManagedInstances() throws Exception {
+    // given
+    var anotherServiceInjectionMethod =
+        AnotherServiceInjector.class.getDeclaredMethod("anotherServiceImpl");
+    anotherServiceInjectionMethod.setAccessible(true);
+    var anotherServiceManagedClass = new ManagedClass(AnotherServiceImpl.class,
+        new AnotherServiceInjector(), anotherServiceInjectionMethod);
+    var someServiceInjectionMethod =
+        ServiceInjector.class.getDeclaredMethod("someServiceImpl", AnotherService.class);
+    someServiceInjectionMethod.setAccessible(true);
+    var someServiceManagedClass =
+        new ManagedClass(SomeServiceImpl.class, new ServiceInjector(), someServiceInjectionMethod);
+    Set<ManagedClass> managedClasses = Set.of(someServiceManagedClass, anotherServiceManagedClass);
+    Container underTest = new Container(managedClasses);
 
-    // // when
-    // underTest.init();
+    // when
+    underTest.init();
 
-    // // then
-    // assertEquals(3, underTest.getManagedClasses().size());
+    // then
+    assertEquals(2, underTest.getManagedClasses().size());
+    assertNotNull(underTest.get(AnotherService.class).orElseThrow());
+    assertNotNull(underTest.get(SomeService.class).orElseThrow());
+  }
 
-    // TestClassA managedTestClassAInstance = underTest.get(TestClassA.class);
-    // assertNotNull(managedTestClassAInstance);
+  @Test
+  void init_Throws_InvalidDataException_When_GivenManagedClassesFactoryMethod_Contain_NonManagedClass()
+      throws Exception {
+    // given
+    final class TestManagedClass {
+    }
+    final class TestNonManagedClass {
+    }
+    @Injector
+    final class TestManagedClassInjector {
+      @Injection
+      TestManagedClass testManagedClass(TestNonManagedClass nonManagedClass) {
+        return new TestManagedClass();
+      }
+    }
+    Container underTest = new Container(Set.of(new ManagedClass(TestManagedClass.class,
+        new TestManagedClassInjector(), TestManagedClassInjector.class
+            .getDeclaredMethod("testManagedClass", TestNonManagedClass.class))));
 
-    // TestClassC managedTestClassCInstance = underTest.get(TestClassC.class);
-    // assertNotNull(managedTestClassCInstance);
-    // Field testClassAFieldOfTestClassC = TestClassC.class.getDeclaredField("testClassA");
-    // testClassAFieldOfTestClassC.setAccessible(true);
-    // assertEquals(managedTestClassAInstance,
-    // testClassAFieldOfTestClassC.get(managedTestClassCInstance));
+    // when
+    InvalidDataException thrownException =
+        assertThrows(InvalidDataException.class, () -> underTest.init());
 
-    // TestClassF managedTestClassFInstance = underTest.get(TestClassF.class);
-    // assertNotNull(managedTestClassFInstance);
-    // Field testClassAFieldOfTestClassF = TestClassF.class.getDeclaredField("testClassA");
-    // testClassAFieldOfTestClassF.setAccessible(true);
-    // Field testClassCFieldOfTestClassF = TestClassF.class.getDeclaredField("testClassC");
-    // testClassCFieldOfTestClassF.setAccessible(true);
-    // assertEquals(managedTestClassAInstance,
-    // testClassAFieldOfTestClassF.get(managedTestClassFInstance));
-    // assertEquals(managedTestClassCInstance,
-    // testClassCFieldOfTestClassF.get(managedTestClassFInstance));
-    // }
+    // then
+    assertEquals(
+        "org.kybinfrastructure.ioc.ContainerTest$1TestManagedClass org.kybinfrastructure.ioc.ContainerTest$1TestManagedClassInjector.testManagedClass(org.kybinfrastructure.ioc.ContainerTest$1TestNonManagedClass) has non-managed class parameter!",
+        thrownException.getMessage());
+  }
 
-    // @Test
-    // @SuppressWarnings({"java:S5845"})
-    // void
-    // init_Throws_UnexpectedException_When_Unexpected_Exception_Occurred_During_Initialization()
-    // throws Exception {
-    // // given
-    // ManagedClass managedClassA =
-    // new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]);
-    // Container underTest = new Container(new HashSet<>(List.of(managedClassA)));
-    // Field managedInstancesField = Container.class.getDeclaredField("managedInstances");
-    // managedInstancesField.setAccessible(true);
-    // managedInstancesField.set(underTest, null);
+  @Test
+  void get_Returns_ManagedInstance_By_GivenClassInstance() throws Exception {
+    // given
+    var anotherServiceInjectionMethod =
+        AnotherServiceInjector.class.getDeclaredMethod("anotherServiceImpl");
+    anotherServiceInjectionMethod.setAccessible(true);
+    var anotherServiceManagedClass = new ManagedClass(AnotherServiceImpl.class,
+        new AnotherServiceInjector(), anotherServiceInjectionMethod);
+    Set<ManagedClass> managedClasses = Set.of(anotherServiceManagedClass);
+    Container underTest = new Container(managedClasses);
+    underTest.init();
 
-    // // when
-    // UnexpectedException thrownException =
-    // assertThrows(UnexpectedException.class, () -> underTest.init());
+    // when
+    AnotherService actualResult = underTest.get(AnotherService.class).orElseThrow();
 
-    // // then
-    // assertEquals("Initialization is not successful!", thrownException.getMessage());
-    // assertEquals(NullPointerException.class, thrownException.getCause().getClass());
-    // }
+    // then
+    assertNotNull(actualResult);
+  }
 
-    // @Test
-    // void get_Returns_ManagedInstance_By_GivenClassInstance() throws Exception {
-    // // given
-    // ManagedClass managedClassF =
-    // new ManagedClass(TestClassF.class, TestClassF.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassC =
-    // new ManagedClass(TestClassC.class, TestClassC.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassA =
-    // new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]);
-    // Container underTest =
-    // new Container(new HashSet<>(List.of(managedClassF, managedClassC, managedClassA))).init();
+  @Test
+  void get_Returns_OptionalEmpty_When_NoManagedInstance_Found_By_GivenClassInstance()
+      throws Exception {
+    // given
+    var anotherServiceInjectionMethod =
+        AnotherServiceInjector.class.getDeclaredMethod("anotherServiceImpl");
+    anotherServiceInjectionMethod.setAccessible(true);
+    var anotherServiceManagedClass = new ManagedClass(AnotherServiceImpl.class,
+        new AnotherServiceInjector(), anotherServiceInjectionMethod);
+    Set<ManagedClass> managedClasses = Set.of(anotherServiceManagedClass);
+    Container underTest = new Container(managedClasses).init();
 
-    // // when
-    // TestClassF actualResult = underTest.get(TestClassF.class);
+    // when
+    var actualResult = underTest.get(ContainerTest.class);
 
-    // // then
-    // assertNotNull(actualResult);
-    // Field testClassAFieldOfTestClassF = TestClassF.class.getDeclaredField("testClassA");
-    // testClassAFieldOfTestClassF.setAccessible(true);
-    // Field testClassCFieldOfTestClassF = TestClassF.class.getDeclaredField("testClassC");
-    // testClassCFieldOfTestClassF.setAccessible(true);
-    // assertEquals(underTest.get(TestClassA.class), testClassAFieldOfTestClassF.get(actualResult));
-    // assertEquals(underTest.get(TestClassC.class), testClassCFieldOfTestClassF.get(actualResult));
-    // }
+    // then
+    assertTrue(actualResult.isEmpty());
+  }
 
-    // @Test
-    // void get_Returns_Null_When_NoManagedInstance_Found_By_GivenClassInstance() {
-    // // given
-    // ManagedClass managedClassA =
-    // new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]);
-    // Container underTest = new Container(new HashSet<>(List.of(managedClassA))).init();
+  @Test
+  void get_Throws_IllegalArgumentException_When_GivenClassInstance_IsNull() throws Exception {
+    // given
+    var anotherServiceInjectionMethod =
+        AnotherServiceInjector.class.getDeclaredMethod("anotherServiceImpl");
+    anotherServiceInjectionMethod.setAccessible(true);
+    var anotherServiceManagedClass = new ManagedClass(AnotherServiceImpl.class,
+        new AnotherServiceInjector(), anotherServiceInjectionMethod);
+    Set<ManagedClass> managedClasses = Set.of(anotherServiceManagedClass);
+    Container underTest = new Container(managedClasses).init();
 
-    // // when
-    // var actualResult = underTest.get(TestClassC.class);
+    // when
+    IllegalArgumentException thrownException =
+        assertThrows(IllegalArgumentException.class, () -> underTest.get(null));
 
-    // // then
-    // assertNull(actualResult);
-    // }
+    // then
+    assertEquals("classInstance cannot be null!", thrownException.getMessage());
+  }
 
-    // @Test
-    // void get_Throws_IllegalArgumentException_When_GivenClassInstance_IsNull() {
-    // // given
-    // Container underTest = new Container(new HashSet<>(
-    // List.of(new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]))))
-    // .init();
+  @Test
+  @SuppressWarnings({"unchecked"})
+  void getManagedClasses_Returns_DeepCopy_Of_ManagedClassInstances() throws Exception {
+    // given
+    var anotherServiceInjectionMethod =
+        AnotherServiceInjector.class.getDeclaredMethod("anotherServiceImpl");
+    anotherServiceInjectionMethod.setAccessible(true);
+    var anotherServiceManagedClass = new ManagedClass(AnotherServiceImpl.class,
+        new AnotherServiceInjector(), anotherServiceInjectionMethod);
+    var someServiceInjectionMethod =
+        ServiceInjector.class.getDeclaredMethod("someServiceImpl", AnotherService.class);
+    someServiceInjectionMethod.setAccessible(true);
+    var someServiceManagedClass =
+        new ManagedClass(SomeServiceImpl.class, new ServiceInjector(), someServiceInjectionMethod);
+    Set<ManagedClass> managedClasses = Set.of(someServiceManagedClass, anotherServiceManagedClass);
+    Container underTest = new Container(managedClasses).init();
 
-    // // when
-    // IllegalArgumentException thrownException =
-    // assertThrows(IllegalArgumentException.class, () -> underTest.get(null));
+    // when
+    var actualResult = underTest.getManagedClasses();
 
-    // // then
-    // assertEquals("classInstance cannot be null!", thrownException.getMessage());
-    // }
-
-    // @Test
-    // void getManagedClasses_Returns_ManagedClassInstances() {
-    // // given
-    // ManagedClass managedClassF =
-    // new ManagedClass(TestClassF.class, TestClassF.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassC =
-    // new ManagedClass(TestClassC.class, TestClassC.class.getDeclaredConstructors()[0]);
-    // ManagedClass managedClassA =
-    // new ManagedClass(TestClassA.class, TestClassA.class.getDeclaredConstructors()[0]);
-    // Container underTest =
-    // new Container(new HashSet<>(List.of(managedClassF, managedClassC, managedClassA)));
-
-    // // when
-    // var actualResult = underTest.getManagedClasses();
-
-    // // then
-    // assertEquals(3, actualResult.size());
-    // assertTrue(actualResult.stream()
-    // .anyMatch(mc -> mc.getName().equals("org.kybinfrastructure.ioc.test_classes.TestClassF")));
-    // assertTrue(actualResult.stream()
-    // .anyMatch(mc -> mc.getName().equals("org.kybinfrastructure.ioc.test_classes.TestClassC")));
-    // assertTrue(actualResult.stream()
-    // .anyMatch(mc -> mc.getName().equals("org.kybinfrastructure.ioc.test_classes.TestClassA")));
-    // }
+    // then
+    assertEquals(2, actualResult.size());
+    assertTrue(actualResult.stream().anyMatch(mc -> mc.equals(SomeServiceImpl.class)));
+    assertTrue(actualResult.stream().anyMatch(mc -> mc.equals(AnotherServiceImpl.class)));
+    Field managedClassesField = Container.class.getDeclaredField("managedClasses");
+    managedClassesField.setAccessible(true);
+    var constructedManagedClasses =
+        (Map<Class<?>, ManagedClass>) managedClassesField.get(underTest);
+    assertNotEquals(constructedManagedClasses, actualResult);
+  }
 
 }
