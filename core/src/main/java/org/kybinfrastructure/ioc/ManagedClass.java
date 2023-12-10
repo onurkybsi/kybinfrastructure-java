@@ -1,7 +1,6 @@
 package org.kybinfrastructure.ioc;
 
-import java.lang.reflect.Constructor;
-import java.util.Arrays;
+import java.lang.reflect.Method;
 
 /**
  * Wrapper for the classes managed by {@link KybContainer}.
@@ -9,31 +8,31 @@ import java.util.Arrays;
 final class ManagedClass {
 
 	private final Class<?> clazz;
-	private final Constructor<?> ctr;
-	private final Class<?>[] ctrParams;
+	private final Object injectorInstance;
+	private final Method factoryMethod;
 
-	ManagedClass(Class<?> clazz, Constructor<?> constructor) {
+	ManagedClass(Class<?> clazz, Object injectorInstance, Method factoryMethod) {
 		this.clazz = clazz;
-		this.ctr = constructor;
-		this.ctrParams = constructor.getParameterTypes();
+		this.injectorInstance = injectorInstance;
+		this.factoryMethod = factoryMethod;
 	}
 
 	Class<?> getClazz() {
 		return clazz;
 	}
 
-	Constructor<?> getCtr() {
-		return ctr;
+	Object getInjectorInstance() {
+		return injectorInstance;
 	}
 
-	Class<?>[] getCtrParams() {
-		return ctrParams;
+	Method getFactoryMethod() {
+		return factoryMethod;
 	}
 
 	@Override
 	public String toString() {
-		return "ManagedClass(clazz=%s,ctr=%s,ctrParams=%s)".formatted(clazz, ctr,
-				Arrays.toString(ctrParams));
+		return "ManagedClass(clazz=%s,injectorInstance=%s,factoryMethod=%s)".formatted(clazz,
+				injectorInstance.getClass().getName(), factoryMethod.getName());
 	}
 
 }

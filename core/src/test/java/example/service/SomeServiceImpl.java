@@ -2,7 +2,7 @@ package example.service;
 
 import example.service.sub.AnotherService;
 
-class SomeServiceImpl implements SomeService {
+public class SomeServiceImpl implements SomeService {
 
   private final AnotherService anotherService;
 

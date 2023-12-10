@@ -14,4 +14,6 @@ class ServiceInjector {
     return new SomeServiceImpl(anotherService);
   }
 
+  void someNonInjectionMethod() {}
+
 }

@@ -1,6 +1,6 @@
 package example.service.sub;
 
-class AnotherServiceImpl implements AnotherService {
+public class AnotherServiceImpl implements AnotherService {
 
   @Override
   public void anotherService() {}
