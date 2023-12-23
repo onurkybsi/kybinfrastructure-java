@@ -7,13 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/**
- * Contains unit test of the component {@link Assertions}
- */
 class AssertionsTest {
 
 	@Test
-	void notNull_Should_Throw_IllegalArgumentException_When_Given_Value_Is_Null() {
+	void notNull_Throws_IllegalArgumentException_When_GivenValue_Is_Null() {
 		// given
 		Object value = null;
 
@@ -26,7 +23,7 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notNull_Should_Not_Throw_IllegalArgumentException_When_Given_Value_Is_Not_Null() {
+	void notNull_DoesNot_Throw_IllegalArgumentException_When_GivenValue_Is_Not_Null() {
 		// given
 		Object value = new Object();
 
@@ -35,7 +32,7 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notBlank_Should_Throw_IllegalArgumentException_When_Given_Value_Is_Null() {
+	void notBlank_Throws_IllegalArgumentException_When_GivenValue_Is_Null() {
 		// given
 		String value = null;
 
@@ -48,9 +45,9 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notBlank_Should_Throw_IllegalArgumentException_When_Given_Value_Has_No_Non_Space_Character() {
+	void notBlank_Throws_IllegalArgumentException_When_GivenValue_Has_No_NonSpace_Character() {
 		// given
-		String value = null;
+		String value = " ";
 
 		// when
 		IllegalArgumentException expectedException = assertThrows(IllegalArgumentException.class,
@@ -61,7 +58,7 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notBlank_Should_Not_Throw_IllegalArgumentException_When_Given_Value_Has_Non_Space_Character() {
+	void notBlank_DoesNot_Throw_IllegalArgumentException_When_GivenValue_Has_NonSpace_Character() {
 		// given
 		String value = " a ";
 
@@ -70,7 +67,7 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notEmpty_Should_Throw_IllegalArgumentException_When_Given_Value_Is_Null() {
+	void notEmpty_Throws_IllegalArgumentException_When_GivenValue_Is_Null() {
 		// given
 		List<Object> value = null;
 
@@ -83,7 +80,7 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notEmpty_Should_Throw_IllegalArgumentException_When_Given_Nonnull_Collection_Has_No_Element() {
+	void notEmpty_Throws_IllegalArgumentException_When_Given_NonNull_Collection_Has_No_Element() {
 		// given
 		List<Object> value = new ArrayList<>();
 
@@ -96,7 +93,7 @@ class AssertionsTest {
 	}
 
 	@Test
-	void notEmpty_Should_Not_Throw_IllegalArgumentException_When_Given_Collection_Has_One_Element_At_Least() {
+	void notEmpty_DoesNot_Throw_IllegalArgumentException_When_GivenCollection_Has_One_Element_At_Least() {
 		// given
 		List<Object> value = List.of(new Object());
 

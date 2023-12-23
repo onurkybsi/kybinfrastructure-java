@@ -3,19 +3,20 @@ package org.kybinfrastructure.utils.validation;
 import java.util.Collection;
 
 /**
- * Contains useful assertion methods
+ * Contains useful assertion methods.
  */
 public final class Assertions {
 
-	private Assertions() {}
+	private Assertions() {
+		throw new UnsupportedOperationException("This class is not initiable!");
+	}
 
 	/**
-	 * Checks whether the given object is not null.
+	 * Asserts the given object value is not null.
 	 * 
-	 * @param value value to be checked
-	 * @param message message to be set as the {@link IllegalArgumentException} message if the given
-	 *        {@code value} is {@code null}
-	 * @throws IllegalArgumentException is thrown when the given {@code value} is {@code null}
+	 * @param value value to assert as non-null
+	 * @param message message to be set as the {@link IllegalArgumentException} message
+	 * @throws IllegalArgumentException when the given {@code value} is {@code null}
 	 */
 	public static void notNull(Object value, String message) {
 		if (value == null) {
@@ -24,13 +25,11 @@ public final class Assertions {
 	}
 
 	/**
-	 * Checks whether the given {@code String} value contains at least one non space character.
+	 * Asserts the given {@code String} value contains at least one non-space character.
 	 * 
-	 * @param value {@code String} value to be checked
-	 * @param message message to be set as the {@link IllegalArgumentException} message if the given
-	 *        {@code value} has no non space character
-	 * @throws IllegalArgumentException is thrown when the given {@code value} has no non space
-	 *         character
+	 * @param value {@code String} value to assert as not blank
+	 * @param message message to be set as the {@link IllegalArgumentException} message
+	 * @throws IllegalArgumentException when the given {@code value} has no non-space character
 	 */
 	public static void notBlank(String value, String message) {
 		if (value == null) {
@@ -42,13 +41,11 @@ public final class Assertions {
 	}
 
 	/**
-	 * Checks whether the given {@code Collection} value contains at least one element or not.
+	 * Asserts the given {@code Collection} value contains at least one element.
 	 * 
-	 * @param value {@code Collection} value to be checked
-	 * @param message message to be set as the {@link IllegalArgumentException} message if the given
-	 *        {@code value} has no element in the collection
-	 * @throws IllegalArgumentException is thrown when the given {@code value} has no element in the
-	 *         collection
+	 * @param value {@code Collection} value to assert as non-empty
+	 * @param message message to be set as the {@link IllegalArgumentException} message
+	 * @throws IllegalArgumentException when the given {@code value} has no element in the collection
 	 */
 	public static void notEmpty(Collection<?> value, String message) {
 		if (value == null) {
