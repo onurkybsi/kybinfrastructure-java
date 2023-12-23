@@ -8,6 +8,10 @@ import org.kybinfrastructure.exception.InvalidDataException;
 
 final class InjectorValidator {
 
+  private InjectorValidator() {
+    throw new UnsupportedOperationException("This class is not initiable!");
+  }
+
   static void assertInjectorClassValid(Class<?> injectorClass) {
     if (injectorClass.isInterface()) {
       throw new InvalidDataException(
@@ -40,24 +44,24 @@ final class InjectorValidator {
   static void assertInjectionMethodValid(Method injectionMethod) {
     if (Modifier.isPrivate(injectionMethod.getModifiers())) {
       throw new InvalidDataException("An injection method cannot be private: %s.%s",
-          injectionMethod.getDeclaringClass(), injectionMethod.getName());
+          injectionMethod.getDeclaringClass().getName(), injectionMethod.getName());
     }
     if (Modifier.isProtected(injectionMethod.getModifiers())) {
       throw new InvalidDataException("An injection method cannot be protected: %s.%s",
-          injectionMethod.getDeclaringClass(), injectionMethod.getName());
+          injectionMethod.getDeclaringClass().getName(), injectionMethod.getName());
     }
     if (Modifier.isStatic(injectionMethod.getModifiers())) {
       throw new InvalidDataException("An injection method cannot be static: %s.%s",
-          injectionMethod.getDeclaringClass(), injectionMethod.getName());
+          injectionMethod.getDeclaringClass().getName(), injectionMethod.getName());
     }
     if (injectionMethod.getReturnType().isPrimitive()) {
       throw new InvalidDataException("An injection method cannot have primitive return type: %s.%s",
-          injectionMethod.getDeclaringClass(), injectionMethod.getName());
+          injectionMethod.getDeclaringClass().getName(), injectionMethod.getName());
     }
     if (Stream.of(injectionMethod.getParameters()).anyMatch(p -> p.getType().isPrimitive())) {
       throw new InvalidDataException(
-          "An injection method cannot have primitive parameters types: %s.%s",
-          injectionMethod.getDeclaringClass(), injectionMethod.getName());
+          "An injection method cannot have primitive parameter types: %s.%s",
+          injectionMethod.getDeclaringClass().getName(), injectionMethod.getName());
     }
   }
 

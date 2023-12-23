@@ -1,8 +1,8 @@
 package org.kybinfrastructure.ioc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Field;
@@ -189,7 +189,7 @@ class ContainerTest {
     managedClassesField.setAccessible(true);
     var constructedManagedClasses =
         (Map<Class<?>, ManagedClass>) managedClassesField.get(underTest);
-    assertNotEquals(constructedManagedClasses, actualResult);
+    assertNotSame(constructedManagedClasses.keySet(), actualResult);
   }
 
 }

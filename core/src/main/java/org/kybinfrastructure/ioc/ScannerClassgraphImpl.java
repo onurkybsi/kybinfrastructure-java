@@ -10,22 +10,19 @@ import io.github.classgraph.ScanResult;
 
 final class ScannerClassgraphImpl implements Scanner {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ScannerClassgraphImpl.class);
 
   @Override
-  public Set<Class<?>> scan(Class<?> rootClass) {
+  public Set<Class<?>> scanForInjectorClasses(Class<?> rootClass) {
     try (ScanResult scanResult =
         new ClassGraph().enableAllInfo().acceptPackages(rootClass.getPackageName()).scan()) {
       var classesWithInjectorAnnotation = scanResult.getClassesWithAnnotation(Injector.class);
 
-      Set<Class<?>> injectorClasses = new LinkedHashSet<>();
-      for (int i = 0; i < classesWithInjectorAnnotation.size(); i++) {
-        Class<?> injectorClass = classesWithInjectorAnnotation.get(i).loadClass();
-
-        LOGGER.debug("{} injector class was loaded!", injectorClass.getName());
-        injectorClasses.add(injectorClass);
+      Set<Class<?>> injectorClasses = new LinkedHashSet<>(classesWithInjectorAnnotation.size());
+      for (var classWithInjectorAnnotation : classesWithInjectorAnnotation) {
+        injectorClasses.add(classWithInjectorAnnotation.loadClass());
+        LOGGER.debug("{} injector class was loaded!", classWithInjectorAnnotation.getName());
       }
-
       return injectorClasses;
     } catch (Exception e) {
       throw new UnexpectedException("Injector classes couldn't be extracted!", e);

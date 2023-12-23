@@ -7,7 +7,7 @@ import example.service.SomeService;
 class KybContainerBuilderTest {
 
   @Test
-  void build_Builds_Fresh_KybContainer_With_Set_Properties() {
+  void build_Builds_Fresh_KybContainer_With_Given_Properties() {
     // given
     Class<SomeService> rootClass = SomeService.class;
     KybContainerBuilder builder = new KybContainerBuilder(rootClass);

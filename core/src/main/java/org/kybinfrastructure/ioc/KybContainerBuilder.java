@@ -18,9 +18,9 @@ final class KybContainerBuilder {
 	}
 
 	/**
-	 * Builds a fresh {@link KybContainer} with set properties.
+	 * Builds a fresh {@link KybContainer} with given properties.
 	 *
-	 * @return built {@link KybContainer}
+	 * @return built {@link KybContainer} instance
 	 */
 	public KybContainer build() {
 		return new KybContainer(rootClass);

@@ -4,8 +4,8 @@ import org.kybinfrastructure.ioc.Injection;
 import org.kybinfrastructure.ioc.Injector;
 import example.service.sub.AnotherService;
 
+// Public modifier is not required, this class was made public for testing purposes.
 @Injector
-// public is not required, this was made public for testing purposes
 public class ServiceInjector {
 
   @Injection

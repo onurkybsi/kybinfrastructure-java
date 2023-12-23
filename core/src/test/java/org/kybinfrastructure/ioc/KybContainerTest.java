@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kybinfrastructure.exception.InvalidDataException;
 import org.kybinfrastructure.ioc.test_classes.abstract_injector.AbstractInjector;
-import org.kybinfrastructure.ioc.test_classes.ctor_with_params.CtorWithParams;
+import org.kybinfrastructure.ioc.test_classes.ctor_with_params_injector.CtorWithParamsInjector;
 import org.kybinfrastructure.ioc.test_classes.injector_with_primititive_param_injecton.InjectorWithPrimitiveParamInjecton;
 import org.kybinfrastructure.ioc.test_classes.injector_with_primititive_return_injecton.InjectorWithPrimitiveReturnInjecton;
 import org.kybinfrastructure.ioc.test_classes.injector_with_private_injecton.InjectorWithPrivateInjecton;
@@ -23,6 +23,7 @@ import org.kybinfrastructure.ioc.test_classes.member_class_injector.MemberClassI
 import org.kybinfrastructure.ioc.test_classes.multiple_ctor_injector.MultipleCtorInjector;
 import example.service.SomeService;
 import example.service.SomeServiceImpl;
+import example.service.sub.AnotherService;
 import example.service.sub.AnotherServiceImpl;
 
 class KybContainerTest {
@@ -41,12 +42,13 @@ class KybContainerTest {
     KybContainer container = new KybContainer(rootClass);
 
     // then
-    var someService = container.get(SomeService.class).orElseThrow();
-    var anotherService = container.get(AnotherServiceImpl.class).orElseThrow();
-    assertNotNull(someService);
-    assertEquals(SomeServiceImpl.class, someService.getClass());
+    var anotherService = container.get(AnotherService.class).orElseThrow();
     assertNotNull(anotherService);
     assertEquals(AnotherServiceImpl.class, anotherService.getClass());
+
+    var someService = container.get(SomeService.class).orElseThrow();
+    assertNotNull(someService);
+    assertEquals(SomeServiceImpl.class, someService.getClass());
     var anotherServiceField = SomeServiceImpl.class.getDeclaredField("anotherService");
     anotherServiceField.setAccessible(true);
     assertEquals(anotherService, anotherServiceField.get(someService));
@@ -128,9 +130,9 @@ class KybContainerTest {
   }
 
   @Test
-  void should_Throw_InvalidDataException_When_ScannedInjector_Has_DefaultConstructor_With_Parameters() {
+  void should_Throw_InvalidDataException_When_ScannedInjector_Has_Constructor_With_Parameters() {
     // given
-    Class<?> rootClass = CtorWithParams.class;
+    Class<?> rootClass = CtorWithParamsInjector.class;
 
     // when
     InvalidDataException thrownException =
@@ -138,7 +140,7 @@ class KybContainerTest {
 
     // then
     assertEquals(
-        "An injector class can only have default constructor: org.kybinfrastructure.ioc.test_classes.ctor_with_params.CtorWithParams",
+        "An injector class can only have default constructor: org.kybinfrastructure.ioc.test_classes.ctor_with_params_injector.CtorWithParamsInjector",
         thrownException.getMessage());
   }
 
@@ -153,7 +155,7 @@ class KybContainerTest {
 
     // then
     assertEquals(
-        "An injection method cannot be private: class org.kybinfrastructure.ioc.test_classes.injector_with_private_injecton.InjectorWithPrivateInjecton.someService",
+        "An injection method cannot be private: org.kybinfrastructure.ioc.test_classes.injector_with_private_injecton.InjectorWithPrivateInjecton.someService",
         thrownException.getMessage());
   }
 
@@ -168,7 +170,7 @@ class KybContainerTest {
 
     // then
     assertEquals(
-        "An injection method cannot be protected: class org.kybinfrastructure.ioc.test_classes.injector_with_protected_injecton.InjectorWithProtectedInjecton.someService",
+        "An injection method cannot be protected: org.kybinfrastructure.ioc.test_classes.injector_with_protected_injecton.InjectorWithProtectedInjecton.someService",
         thrownException.getMessage());
   }
 
@@ -183,7 +185,7 @@ class KybContainerTest {
 
     // then
     assertEquals(
-        "An injection method cannot be static: class org.kybinfrastructure.ioc.test_classes.injector_with_static_injecton.InjectorWithStaticInjecton.someService",
+        "An injection method cannot be static: org.kybinfrastructure.ioc.test_classes.injector_with_static_injecton.InjectorWithStaticInjecton.someService",
         thrownException.getMessage());
   }
 
@@ -198,12 +200,12 @@ class KybContainerTest {
 
     // then
     assertEquals(
-        "An injection method cannot have primitive return type: class org.kybinfrastructure.ioc.test_classes.injector_with_primititive_return_injecton.InjectorWithPrimitiveReturnInjecton.someService",
+        "An injection method cannot have primitive return type: org.kybinfrastructure.ioc.test_classes.injector_with_primititive_return_injecton.InjectorWithPrimitiveReturnInjecton.someService",
         thrownException.getMessage());
   }
 
   @Test
-  void should_Throw_InvalidDataException_When_ScannedInjector_InjectionMethod_Has_Primitive_Param() {
+  void should_Throw_InvalidDataException_When_ScannedInjector_InjectionMethod_Has_PrimitiveType_Parameter() {
     // given
     Class<?> rootClass = InjectorWithPrimitiveParamInjecton.class;
 
@@ -213,12 +215,12 @@ class KybContainerTest {
 
     // then
     assertEquals(
-        "An injection method cannot have primitive parameters types: class org.kybinfrastructure.ioc.test_classes.injector_with_primititive_param_injecton.InjectorWithPrimitiveParamInjecton.someService",
+        "An injection method cannot have primitive parameter types: org.kybinfrastructure.ioc.test_classes.injector_with_primititive_param_injecton.InjectorWithPrimitiveParamInjecton.someService",
         thrownException.getMessage());
   }
 
   @Test
-  void builder_Should_Return_BuilderInstance_Of_KybContainer() {
+  void builder_Returns_BuilderInstance_Of_KybContainer() {
     // given
     Class<?> rootClass = SomeService.class;
 
@@ -227,11 +229,10 @@ class KybContainerTest {
 
     // then
     assertNotNull(actualResult);
-    assertNotNull(actualResult.build());
   }
 
   @Test
-  void builder_Should_Throw_IllegalArgumentException_When_GivenRootClass_Is_Null() {
+  void builder_Throws_IllegalArgumentException_When_GivenRootClass_Is_Null() {
     // given
     Class<?> rootClass = null;
 
@@ -244,7 +245,7 @@ class KybContainerTest {
   }
 
   @Test
-  void get_Should_Return_InitializedInstance_By_GivenClassInstance() {
+  void get_Returns_KybContainerInitiatedInstance_By_GivenClassInstance() {
     // given
     KybContainer container = KybContainer.builder(SomeService.class).build();
 
@@ -256,7 +257,7 @@ class KybContainerTest {
   }
 
   @Test
-  void get_Should_Return_OptionalEmpty_When_No_ManagedInstance_Found_By_GivenClassInstance() {
+  void get_Returns_OptionalEmpty_When_No_ManagedInstance_Exists_By_GivenClassInstance() {
     // given
     KybContainer container = KybContainer.builder(SomeService.class).build();
 
@@ -268,7 +269,7 @@ class KybContainerTest {
   }
 
   @Test
-  void getManagedClasses_ShouldReturn_All_KybContainer_Managed_Instances() {
+  void getManagedClasses_Returns_All_KybContainerManagedClasses() {
     // given
     KybContainer container = KybContainer.builder(SomeService.class).build();
 

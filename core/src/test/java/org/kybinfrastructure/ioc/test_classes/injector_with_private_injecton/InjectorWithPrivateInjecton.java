@@ -11,9 +11,7 @@ public class InjectorWithPrivateInjecton {
   private SomeService someService() {
     return new SomeService() {
       @Override
-      public void someService() {
-        throw new UnsupportedOperationException("Unimplemented method 'someService'");
-      }
+      public void someService() {}
     };
   }
 

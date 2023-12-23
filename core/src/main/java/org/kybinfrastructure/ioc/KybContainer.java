@@ -3,7 +3,6 @@ package org.kybinfrastructure.ioc;
 import static org.kybinfrastructure.ioc.InjectorValidator.assertInjectionMethodValid;
 import static org.kybinfrastructure.ioc.InjectorValidator.assertInjectorClassValid;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.kybinfrastructure.exception.UnexpectedException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -33,7 +32,7 @@ public final class KybContainer {
 	KybContainer(Class<?> rootClass) {
 		LOGGER.debug("KybContainer is being built with root class: {}", rootClass);
 
-		Set<Class<?>> injectorClasses = SCANNER.scan(rootClass);
+		Set<Class<?>> injectorClasses = SCANNER.scanForInjectorClasses(rootClass);
 		Map<Method, Object> injectionMethodsWithInjectors =
 				extractInjectionMethodsWithInjectors(injectorClasses);
 		Set<ManagedClass> managedClasses = buildManagedClasses(injectionMethodsWithInjectors);
@@ -56,14 +55,12 @@ public final class KybContainer {
 	}
 
 	/**
-	 * <p>
-	 * Returns the <i>KybContainer</i> initialized instance of the given type.
-	 * </p>
+	 * Returns the <i>KybContainer</i> initiated instance of the given type.
 	 *
 	 * @param <T> type of the instance
 	 * @param classInstance class instance of the type
-	 * @return <i>KybContainer</i> initialized instance, {@code Optional.empty} when no initialized
-	 *         instance found by the given type
+	 * @return <i>KybContainer</i> initiated instance, {@code Optional.empty} when no initiated
+	 *         instance exists by the given type
 	 */
 	public <T> Optional<T> get(Class<T> classInstance) {
 		return container.get(classInstance);
@@ -82,7 +79,6 @@ public final class KybContainer {
 	private static Map<Method, Object> extractInjectionMethodsWithInjectors(
 			Set<Class<?>> injectorClasses) {
 		Map<Method, Object> injectionMethodsWithInjectors = new LinkedHashMap<>();
-
 		for (Class<?> injectorClass : injectorClasses) {
 			assertInjectorClassValid(injectorClass);
 
@@ -95,7 +91,6 @@ public final class KybContainer {
 				injectionMethodsWithInjectors.put(injectorMethod, injectorClassInstance);
 			}
 		}
-
 		return injectionMethodsWithInjectors;
 	}
 
@@ -104,16 +99,14 @@ public final class KybContainer {
 			Constructor<?> ctr = injectorClass.getDeclaredConstructor();
 			ctr.setAccessible(true);
 			return ctr.newInstance();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			throw new UnexpectedException("Injection methods couldn't be extracted!", e);
+		} catch (Exception e) {
+			throw new UnexpectedException("Injector class couldn't be built!", e);
 		}
 	}
 
 	private static Set<ManagedClass> buildManagedClasses(
 			Map<Method, Object> injectionMethodsWithInjectors) {
 		Set<ManagedClass> classesToManage = new HashSet<>();
-
 		for (Entry<Method, Object> injectionMethodWithInjector : injectionMethodsWithInjectors
 				.entrySet()) {
 			var classToManage = new ManagedClass(injectionMethodWithInjector.getKey().getReturnType(),
@@ -121,7 +114,6 @@ public final class KybContainer {
 			classesToManage.add(classToManage);
 			LOGGER.trace("{} added to managed classes!", classToManage);
 		}
-
 		return classesToManage;
 	}
 

@@ -16,13 +16,14 @@ import org.slf4j.LoggerFactory;
 
 final class Container {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(KybContainer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Container.class);
 
 	private final Map<Class<?>, ManagedClass> managedClasses;
 	private final HashMap<Class<?>, Object> managedInstances = new HashMap<>();
 
 	Container(Set<ManagedClass> managedClasses) {
-		LinkedHashMap<Class<?>, ManagedClass> _managedClasses = new LinkedHashMap<>();
+		LinkedHashMap<Class<?>, ManagedClass> _managedClasses =
+				new LinkedHashMap<>(managedClasses.size());
 		managedClasses.stream()
 				.sorted((c1, c2) -> c1.getFactoryMethod().getParameterCount()
 						- c2.getFactoryMethod().getParameterCount())

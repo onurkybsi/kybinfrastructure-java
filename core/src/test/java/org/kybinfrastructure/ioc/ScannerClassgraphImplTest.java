@@ -13,12 +13,12 @@ class ScannerClassgraphImplTest {
   private final ScannerClassgraphImpl underTest = new ScannerClassgraphImpl();
 
   @Test
-  void scan_Returns_Injector_Classes_Under_GivenRootClass_Package() {
+  void scanForInjectorClasses_Returns_InjectorClasses_Under_GivenRootClassPackage() {
     // given
     Class<?> rootClass = SomeService.class;
 
     // when
-    Set<Class<?>> actualResult = underTest.scan(rootClass);
+    Set<Class<?>> actualResult = underTest.scanForInjectorClasses(rootClass);
 
     // then
     assertEquals(2, actualResult.size());
@@ -29,13 +29,13 @@ class ScannerClassgraphImplTest {
   }
 
   @Test
-  void scan_Throws_UnexpectedException_When_Unexpected_Exception_Occurred() {
+  void scanForInjectorClasses_Throws_UnexpectedException_When_Unexpected_Exception_Occurred() {
     // given
     Class<?> rootClass = null;
 
     // when
     UnexpectedException thrownException =
-        assertThrows(UnexpectedException.class, () -> underTest.scan(rootClass));
+        assertThrows(UnexpectedException.class, () -> underTest.scanForInjectorClasses(rootClass));
 
     // then
     assertEquals("Injector classes couldn't be extracted!", thrownException.getMessage());
