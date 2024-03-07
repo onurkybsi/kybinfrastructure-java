@@ -306,4 +306,46 @@ final class DynamicArrayTest {
     assertEquals(5, actualResult);
   }
 
+  @Test
+  void insertAt_Should_Add_GivenItem_IntoArrayGivenIx_By_Increasing_Capacity_When_Capacity_IsFull() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {2});
+    dynamicArray.insertFirst(1);
+
+    // when
+    dynamicArray.insertAt(1, 3);
+
+    // then
+    assertEquals(1, dynamicArray.getAt(0));
+    assertEquals(3, dynamicArray.getAt(1));
+    assertEquals(2, dynamicArray.getAt(2));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(3));
+  }
+
+  @Test
+  void insertAt_Should_Add_GivenItem_IntoArrayGivenIx_By_Shifting_Items_AfterIx_When_Capacity_IsNotFull() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4});
+    dynamicArray.deleteLast();
+
+    // when
+    dynamicArray.insertAt(1, 5);
+
+    // then
+    assertEquals(1, dynamicArray.getAt(0));
+    assertEquals(5, dynamicArray.getAt(1));
+    assertEquals(2, dynamicArray.getAt(2));
+    assertEquals(3, dynamicArray.getAt(3));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(4));
+  }
+
+  @Test
+  void insertAt_Should_Throw_IndexOutOfBoundsException_When_GivenIx_OutOf_UnderlyingArray() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5});
+
+    // when & then
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.insertAt(5, 6));
+  }
+
 }

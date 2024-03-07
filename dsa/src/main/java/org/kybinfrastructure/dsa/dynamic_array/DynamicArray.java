@@ -148,6 +148,38 @@ public final class DynamicArray<T> {
     }
   }
 
+  public void insertAt(int ix, T valueToInsert) {
+    int size = size();
+    if (ix >= size) {
+      throw new IndexOutOfBoundsException("ix cannot be bigger than size!");
+    }
+
+    if (size == capacity) {
+      int newCapacity = size * GROWTH_FACTOR;
+
+      Object[] grownSrc = new Object[newCapacity];
+      for (int i = 0; i < ix; i++) {
+        grownSrc[i] = this.src[startIx + i];
+      }
+      grownSrc[ix] = valueToInsert;
+      for (int i = ix; i < size; i++) {
+        grownSrc[ix + 1] = this.src[startIx + i];
+      }
+
+      this.capacity = newCapacity;
+      this.startIx = 0;
+      this.endIx = size;
+      this.src = grownSrc;
+    } else {
+      for (int i = endIx; i >= startIx + ix; i--) {
+        this.src[startIx + i + 1] = this.src[startIx + i];
+      }
+      this.src[startIx + ix] = valueToInsert;
+
+      this.endIx = size;
+    }
+  }
+
   public int size() {
     if (this.endIx < 0) {
       return 0;
