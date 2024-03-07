@@ -282,31 +282,6 @@ final class DynamicArrayTest {
   }
 
   @Test
-  void size_Should_Return_Zero_When_DynamicArray_Has_NoItem() {
-    // given
-    var dynamicArray = DynamicArray.empty();
-
-    // when
-    int actualResult = dynamicArray.size();
-
-    // then
-    assertEquals(0, actualResult);
-  }
-
-  @Test
-  void size_Should_Return_NumberOfItems_In_DynamicArray_When_DynamicArray_Has_SomeItems() {
-    // given
-    var dynamicArray = DynamicArray.from(new Integer[] {2, 3, 4, 5});
-    dynamicArray.insertFirst(1);
-
-    // when
-    int actualResult = dynamicArray.size();
-
-    // then
-    assertEquals(5, actualResult);
-  }
-
-  @Test
   void insertAt_Should_Add_GivenItem_IntoArrayGivenIx_By_Increasing_Capacity_When_Capacity_IsFull() {
     // given
     var dynamicArray = DynamicArray.from(new Integer[] {2});
@@ -346,6 +321,79 @@ final class DynamicArrayTest {
 
     // when & then
     assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.insertAt(5, 6));
+  }
+
+  @Test
+  void deleteAt_Should_Delete_ItemAtGivenIx_By_Decreasing_Capacity_When_SizeCapacity_Rate_Is_Lower_Than_ShrinkThreshold() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5, 6});
+
+    // when
+    dynamicArray.deleteAt(2);
+
+    // then
+    assertEquals(1, dynamicArray.getAt(0));
+    assertEquals(2, dynamicArray.getAt(1));
+    assertEquals(4, dynamicArray.getAt(2));
+    assertEquals(5, dynamicArray.getAt(3));
+    assertEquals(6, dynamicArray.getAt(4));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(5));
+  }
+
+  @Test
+  void deleteAt_Should_Delete_ItemAtGivenIx_By_Shifting_Items_AfterIx_When_SizeCapacity_Rate_IsNot_Lower_Than_ShrinkThreshold() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5, 6});
+    dynamicArray.deleteFirst();
+
+    // when
+    dynamicArray.deleteAt(2);
+
+    // then
+    assertEquals(2, dynamicArray.getAt(0));
+    assertEquals(3, dynamicArray.getAt(1));
+    assertEquals(5, dynamicArray.getAt(2));
+    assertEquals(6, dynamicArray.getAt(3));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(4));
+  }
+
+  @Test
+  void deleteAt_Should_Delete_ItemAtGivenIx_By_Shifting_Items_AfterIx_When_Capacity_Is_Lower_That_DefaultCapacity() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3});
+
+    // when
+    dynamicArray.deleteAt(1);
+
+    // then
+    assertEquals(1, dynamicArray.getAt(0));
+    assertEquals(3, dynamicArray.getAt(1));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(2));
+  }
+
+  @Test
+  void size_Should_Return_Zero_When_DynamicArray_Has_NoItem() {
+    // given
+    var dynamicArray = DynamicArray.empty();
+
+    // when
+    int actualResult = dynamicArray.size();
+
+    // then
+    assertEquals(0, actualResult);
+  }
+
+  @Test
+  void size_Should_Return_NumberOfItems_In_DynamicArray_When_DynamicArray_Has_SomeItems() {
+    // given
+    var dynamicArray = DynamicArray.from(new Integer[] {2, 3, 4, 5});
+    dynamicArray.insertFirst(1);
+
+    // when
+    int actualResult = dynamicArray.size();
+
+    // then
+    assertEquals(5, actualResult);
   }
 
 }

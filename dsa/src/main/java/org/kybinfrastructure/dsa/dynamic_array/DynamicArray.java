@@ -40,15 +40,15 @@ public final class DynamicArray<T> {
 
   @SuppressWarnings({"unchecked"})
   public T getAt(int ix) {
-    if (ix >= size()) {
-      throw new IndexOutOfBoundsException("No element exists at index " + ix);
+    if (ix < 0 || ix >= size()) {
+      throw new IndexOutOfBoundsException(ix);
     }
     return (T) this.src[startIx + ix];
   }
 
   public void setAt(int ix, T valueToSet) {
-    if (ix >= size()) {
-      throw new IndexOutOfBoundsException("No element exists at index " + ix);
+    if (ix < 0 || ix >= size()) {
+      throw new IndexOutOfBoundsException(ix);
     }
     this.src[startIx + ix] = valueToSet;
   }
@@ -150,8 +150,8 @@ public final class DynamicArray<T> {
 
   public void insertAt(int ix, T valueToInsert) {
     int size = size();
-    if (ix >= size) {
-      throw new IndexOutOfBoundsException("ix cannot be bigger than size!");
+    if (ix < 0 || ix >= size) {
+      throw new IndexOutOfBoundsException(ix);
     }
 
     if (size == capacity) {
@@ -172,12 +172,43 @@ public final class DynamicArray<T> {
       this.src = grownSrc;
     } else {
       for (int i = endIx; i >= startIx + ix; i--) {
-        this.src[startIx + i + 1] = this.src[startIx + i];
+        this.src[i + 1] = this.src[i];
       }
       this.src[startIx + ix] = valueToInsert;
 
-      this.endIx = size;
+      this.endIx++;
     }
+  }
+
+  public void deleteAt(int ix) {
+    int size = size();
+    if (ix < 0 || ix >= size) {
+      throw new IndexOutOfBoundsException(ix);
+    }
+    int newSize = size - 1;
+
+    if (this.capacity > DEFAULT_CAPACITY && ((float) newSize / this.capacity) < SHRINK_THRESHOLD) {
+      int newCapacity = Math.max(DEFAULT_CAPACITY, capacity / 2);
+      Object[] shrunkSource = new Object[newCapacity];
+      for (int i = 0; i < ix; i++) {
+        shrunkSource[i] = this.src[startIx + i];
+      }
+      for (int i = ix; i < size; i++) {
+        shrunkSource[i] = this.src[startIx + i + 1];
+      }
+
+      this.capacity = newCapacity;
+      this.startIx = 0;
+      this.endIx = newSize - 1;
+      this.src = shrunkSource;
+    } else {
+      for (int i = startIx + ix + 1; i <= endIx; i++) {
+        this.src[i - 1] = this.src[i];
+      }
+
+      this.endIx--;
+    }
+
   }
 
   public int size() {
