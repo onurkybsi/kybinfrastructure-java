@@ -3,6 +3,8 @@ package org.kybinfrastructure.dsa.dynamic_array;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 final class DynamicArrayTest {
 
@@ -37,7 +39,7 @@ final class DynamicArrayTest {
   }
 
   @Test
-  void getAt_Should_Return_Item_At_Given_Ix() {
+  void getAt_Should_Return_Element_At_GivenIx() {
     // given
     var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5});
 
@@ -48,17 +50,18 @@ final class DynamicArrayTest {
     assertEquals(4, actualResult);
   }
 
-  @Test
-  void getAt_Should_Throw_IndexOutOfBoundsException_When_GivenIx_OutOf_UnderlyingArray() {
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 5})
+  void getAt_Should_Throw_IndexOutOfBoundsException_When_GivenIx_OutOf_UnderlyingArray(int ix) {
     // given
     var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5});
 
     // when & then
-    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(5));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.getAt(ix));
   }
 
   @Test
-  void setAt_Should_Set_Item_At_Given_Ix_By_GivenValue() {
+  void setAt_Should_Set_Element_At_GivenIx_By_GivenValue() {
     // given
     var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5});
 
@@ -69,13 +72,14 @@ final class DynamicArrayTest {
     assertEquals(6, dynamicArray.getAt(3));
   }
 
-  @Test
-  void setAt_Should_Throw_IndexOutOfBoundsException_When_GivenIx_OutOf_UnderlyingArray() {
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 5})
+  void setAt_Should_Throw_IndexOutOfBoundsException_When_GivenIx_OutOf_UnderlyingArray(int ix) {
     // given
     var dynamicArray = DynamicArray.from(new Integer[] {1, 2, 3, 4, 5});
 
     // when & then
-    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.setAt(5, 6));
+    assertThrows(IndexOutOfBoundsException.class, () -> dynamicArray.setAt(ix, 6));
   }
 
   @Test
