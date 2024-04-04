@@ -1,71 +1,140 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.kybinfrastructure</groupId>
-	<artifactId>main</artifactId>
-	<version>0.1.0</version>
-	<name>KybInfrastructure</name>
-	<description>This project contains useful implementations which can be used during Java application development</description>
-	<packaging>pom</packaging>
-	<url>https://github.com/onurkybsi/kybinfrastructure-java</url>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>19</maven.compiler.source>
-		<maven.compiler.target>19</maven.compiler.target>
-		<version.log4j>2.20.0</version.log4j>
-		<version.junit>5.9.1</version.junit>
-		<version.mockito>5.2.0</version.mockito>
-		<version.maven-surefire-plugin>3.2.3</version.maven-surefire-plugin>
-	</properties>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>${version.log4j}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${version.log4j}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>${version.log4j}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${version.junit}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${version.mockito}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${version.maven-surefire-plugin}</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
-
-	<modules>
-		<module>core</module>
-	</modules>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  	
+  <modelVersion>4.0.0</modelVersion>
+  	
+  <groupId>org.kybinfrastructure</groupId>
+  	
+  <artifactId>main</artifactId>
+  	
+  <version>0.1.0</version>
+  	
+  <name>KybInfrastructure</name>
+  	
+  <description>This project contains useful implementations which can be used during Java application development</description>
+  	
+  <packaging>pom</packaging>
+  	
+  <url>https://github.com/onurkybsi/kybinfrastructure-java</url>
+  	
+  <properties>
+    		
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    		
+    <maven.compiler.source>19</maven.compiler.source>
+    		
+    <maven.compiler.target>19</maven.compiler.target>
+    		
+    <version.log4j>2.20.0</version.log4j>
+    		
+    <version.junit>5.9.1</version.junit>
+    		
+    <version.mockito>5.2.0</version.mockito>
+    		
+    <version.maven-surefire-plugin>3.2.3</version.maven-surefire-plugin>
+    	
+  </properties>
+  	
+  <dependencies>
+    		
+    <dependency>
+      			
+      <groupId>org.apache.logging.log4j</groupId>
+      			
+      <artifactId>log4j-api</artifactId>
+      			
+      <version>${version.log4j}</version>
+      		
+    </dependency>
+    		
+    <dependency>
+      			
+      <groupId>org.apache.logging.log4j</groupId>
+      			
+      <artifactId>log4j-core</artifactId>
+      			
+      <version>${version.log4j}</version>
+      		
+    </dependency>
+    		
+    <dependency>
+      			
+      <groupId>org.apache.logging.log4j</groupId>
+      			
+      <artifactId>log4j-slf4j-impl</artifactId>
+      			
+      <version>${version.log4j}</version>
+      		
+    </dependency>
+    		
+    <dependency>
+      			
+      <groupId>org.junit.jupiter</groupId>
+      			
+      <artifactId>junit-jupiter-engine</artifactId>
+      			
+      <version>${version.junit}</version>
+      			
+      <scope>test</scope>
+      		
+    </dependency>
+    		
+    <dependency>
+      			
+      <groupId>org.junit.jupiter</groupId>
+      			
+      <artifactId>junit-jupiter-params</artifactId>
+      			
+      <version>${version.junit}</version>
+      			
+      <scope>test</scope>
+      		
+    </dependency>
+    		
+    <dependency>
+      			
+      <groupId>org.mockito</groupId>
+      			
+      <artifactId>mockito-core</artifactId>
+      			
+      <version>${version.mockito}</version>
+      			
+      <scope>test</scope>
+      		
+    </dependency>
+    	
+  </dependencies>
+  	
+  <build>
+    		
+    <pluginManagement>
+      			
+      <plugins>
+        				
+        <plugin>
+          					
+          <groupId>org.apache.maven.plugins</groupId>
+          					
+          <artifactId>maven-surefire-plugin</artifactId>
+          					
+          <version>${version.maven-surefire-plugin}</version>
+          				
+        </plugin>
+        			
+      </plugins>
+      		
+    </pluginManagement>
+    	
+  </build>
+  	
+  <modules>
+    		
+    <module>core</module>
+    		
+    <module>task-manager</module>
+    	  
+    <module>dsa</module>
+      
+  </modules>
+  
 </project>
