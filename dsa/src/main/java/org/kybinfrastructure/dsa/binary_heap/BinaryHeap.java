@@ -33,6 +33,7 @@ public final class BinaryHeap<T extends Comparable<T>> {
    * @param <T> type of elements
    * @param elements elements to insert to binary heap
    * @return built binary heap
+   * @implNote Time complexity: <i>O(n)</i>
    */
   public static <T extends Comparable<T>> BinaryHeap<T> from(T[] elements) {
     T[] _elements = Arrays.copyOf(elements, elements.length); // NOSONAR
@@ -43,14 +44,36 @@ public final class BinaryHeap<T extends Comparable<T>> {
     return new BinaryHeap<>(DynamicArray.from(_elements));
   }
 
+  /**
+   * Inserts a new element into the binary heap.
+   * 
+   * @param element element to insert
+   * @implNote Time complexity: <i>O(log n)</i>
+   */
   public void insert(T element) {
-    throw new UnsupportedOperationException("Unimplemented method 'insert'");
+    this.src.insertLast(element);
+    heapifyUp(this.src.size() - 1);
   }
 
+  /**
+   * Returns the element with maximum value.
+   * 
+   * @return the element with maximum value, {@code null} if there is no element in the binary heap
+   * @implNote Time complexity: <i>O(1)</i>
+   */
   public T findMax() {
-    throw new UnsupportedOperationException("Unimplemented method 'findMax'");
+    if (this.src.size() == 0) {
+      return null;
+    }
+    return this.src.getAt(0);
   }
 
+  /**
+   * Deletes the element with maximum value from binary heap and returns it.
+   * 
+   * @return deleted element, {@code null} if there is no element in the binary heap
+   * @implNote Time complexity: <i>O(log n)</i>
+   */
   public T deleteMax() {
     if (this.src.size() == 0) {
       return null;
@@ -68,6 +91,11 @@ public final class BinaryHeap<T extends Comparable<T>> {
     return first;
   }
 
+  /**
+   * Returns the number of elements in the binary heap.
+   * 
+   * @return number of elements in the binary heap
+   */
   public int size() {
     return this.src.size();
   }
@@ -92,6 +120,19 @@ public final class BinaryHeap<T extends Comparable<T>> {
     if (this.src.getAt(biggerChildIx).compareTo(this.src.getAt(ix)) > 0) {
       swap(ix, biggerChildIx);
       heapifyDown(biggerChildIx);
+    }
+  }
+
+  private void heapifyUp(int ix) {
+    int parentIx = (ix - 1) / 2;
+    T parent = parentIx > 0 ? this.src.getAt(parentIx) : null;
+    if (parent == null) {
+      return;
+    }
+
+    if (parent.compareTo(this.src.getAt(ix)) > 0) {
+      swap(ix, parentIx);
+      heapifyUp(parentIx);
     }
   }
 
