@@ -23,7 +23,7 @@ final class UnweightedGraphTest {
             .vertex(vertexF, List.of(vertexB, vertexE)).build();
 
     // when
-    var actual = graph.bfs(vertexA, vertexF);
+    var actual = graph.shortestPath(vertexA, vertexF);
 
     // then
     assertThat(actual).isEqualTo(List.of(vertexA, vertexB, vertexF));

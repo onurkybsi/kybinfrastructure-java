@@ -19,12 +19,29 @@ import lombok.RequiredArgsConstructor;
 public final class UnweightedGraph<T> {
 
   private final HashMap<Vertex<T>, ArrayList<Vertex<T>>> vertices;
+  private final IteratorType iteratorType;
 
+  /**
+   * Returns the builder for {@link UnweightedGraph}.
+   * 
+   * @param <T> type of the vertex values
+   * @return builder for {@link UnweightedGraph}
+   */
   public static <T> UnweightedGraphBuilder<T> builder() {
     return new UnweightedGraphBuilder<>();
   }
 
-  public ArrayList<Vertex<T>> bfs(Vertex<T> from, Vertex<T> to) {
+  /**
+   * Returns the shortest path between {@code from} and {@code to}.
+   * 
+   * @param from vertex the path starts from
+   * @param to vertex the path ends at
+   * @return shortest path between given vertices
+   * @throws NullPointerException if one of given vertices is null
+   * @apiNote The <a href="https://en.wikipedia.org/wiki/Breadth-first_search">BFS</a> is applied to
+   *          find the shortest path.
+   */
+  public ArrayList<Vertex<T>> shortestPath(Vertex<T> from, Vertex<T> to) {
     Objects.requireNonNull(from, "from cannot be null!");
     Objects.requireNonNull(to, "to cannot be null!");
 
