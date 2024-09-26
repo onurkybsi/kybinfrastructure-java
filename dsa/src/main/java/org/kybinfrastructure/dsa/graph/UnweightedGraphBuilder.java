@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 public final class UnweightedGraphBuilder<T> {
 
   private final HashMap<Vertex<T>, ArrayList<Vertex<T>>> vertices = new HashMap<>();
-  private IteratorType iteratorType;
 
   /**
    * Adds a new vertex to the graph.
@@ -45,25 +44,12 @@ public final class UnweightedGraphBuilder<T> {
   }
 
   /**
-   * Sets the iterator type of the graph.
-   * 
-   * @param iteratorType iterator type
-   * @return {@code this} for chaining
-   * @throws NullPointerException if given {@code iteratorType} is null
-   */
-  public UnweightedGraphBuilder<T> iterator(IteratorType iteratorType) {
-    Objects.requireNonNull(iteratorType, "iteratorType cannot be null!");
-    this.iteratorType = iteratorType;
-    return this;
-  }
-
-  /**
    * Builds the graph.
    * 
    * @return built graph
    */
   public UnweightedGraph<T> build() {
-    return new UnweightedGraph<>(vertices, iteratorType);
+    return new UnweightedGraph<>(vertices);
   }
 
 }

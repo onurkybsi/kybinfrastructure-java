@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Queue;
 import lombok.AccessLevel;
@@ -16,10 +19,9 @@ import lombok.RequiredArgsConstructor;
  * @author Onur Kayabasi(o.kayabasi@outlook.com)
  */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public final class UnweightedGraph<T> {
+public final class UnweightedGraph<T> implements Iterable<Vertex<T>> {
 
   private final HashMap<Vertex<T>, ArrayList<Vertex<T>>> vertices;
-  private final IteratorType iteratorType;
 
   /**
    * Returns the builder for {@link UnweightedGraph}.
@@ -47,7 +49,7 @@ public final class UnweightedGraph<T> {
 
     HashSet<Vertex<T>> visited = new HashSet<>();
     Queue<ArrayList<Vertex<T>>> temp = new LinkedList<>();
-    temp.add(new ArrayList<>(Arrays.asList(from)));
+    temp.add(new ArrayList<>(List.of(from)));
     while (!temp.isEmpty()) {
       var curPath = temp.remove();
       var curVertex = curPath.get(curPath.size() - 1);
@@ -69,6 +71,11 @@ public final class UnweightedGraph<T> {
   }
 
   @Override
+  public Iterator<Vertex<T>> iterator() {
+    return new BfsIterator<>(bfs(this.vertices));
+  }
+
+  @Override
   public String toString() {
     StringBuilder b = new StringBuilder();
     for (var vertex : vertices.entrySet()) {
@@ -79,6 +86,56 @@ public final class UnweightedGraph<T> {
       b.append(Arrays.toString(vertex.getValue().stream().map(Vertex::value).toArray()));
     }
     return "UnweightedGraph[%s\n]".formatted(b);
+  }
+
+  private static <T> ArrayList<Vertex<T>> bfs(HashMap<Vertex<T>, ArrayList<Vertex<T>>> vertices) {
+    ArrayList<Vertex<T>> visited = new ArrayList<>();
+
+    Queue<ArrayList<Vertex<T>>> temp = new LinkedList<>();
+    Vertex<T> from = vertices.entrySet().stream().findAny().map(v -> v.getKey()).orElse(null);
+    if (from == null)
+      return visited;
+    temp.add(new ArrayList<Vertex<T>>(List.of(from)));
+    while (visited.size() < vertices.size()) {
+      var curPath = temp.remove();
+      var curVertex = curPath.get(curPath.size() - 1);
+
+      var neighbors = vertices.get(curVertex);
+      for (var neighbor : neighbors) {
+        if (visited.contains(neighbor))
+          continue;
+
+        var anotherPath = new ArrayList<>(curPath);
+        anotherPath.add(neighbor);
+        temp.add(anotherPath);
+      }
+
+      visited.add(curVertex);
+    }
+
+    return visited;
+  }
+
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+  private static class BfsIterator<T> implements Iterator<Vertex<T>> {
+
+    private final ArrayList<Vertex<T>> vertices;
+
+    private int curIx = 0;
+
+    @Override
+    public boolean hasNext() {
+      return curIx < vertices.size();
+    }
+
+    @Override
+    public Vertex<T> next() {
+      if (curIx >= vertices.size()) {
+        throw new NoSuchElementException();
+      }
+      return vertices.get(curIx++);
+    }
+
   }
 
 }
