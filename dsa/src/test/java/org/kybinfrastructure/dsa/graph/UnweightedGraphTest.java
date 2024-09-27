@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 final class UnweightedGraphTest {
 
-  private static final UnweightedGraph<String> testGraph;
-  static {
+  private UnweightedGraph<String> testGraph;
+
+  @BeforeEach
+  void setUp() {
     var vertexA = new Vertex<String>("A");
     var vertexB = new Vertex<String>("B");
     var vertexC = new Vertex<String>("C");
@@ -71,6 +74,26 @@ final class UnweightedGraphTest {
 
     // then
     assertThat(actual).isNull();
+  }
+
+  @Test
+  void should_Add_New_Vertices_To_Graph() {
+    // given
+    var vertex = new Vertex<>("G");
+    var vertexA = new Vertex<String>("A");
+    var vertexB = new Vertex<String>("B");
+    var neighbors = List.of(vertexA, vertexB);
+
+    // when
+    testGraph.add(vertex, neighbors);
+
+    // then
+    assertThat(testGraph.size()).isEqualTo(7);
+    assertThat(testGraph.neighbors(vertex)).isEqualTo(neighbors);
+    assertThat(testGraph.neighbors(vertexA).stream().map(Vertex::value).toList())
+        .isEqualTo(List.of("B", "C", "D", "G"));
+    assertThat(testGraph.neighbors(vertexB).stream().map(Vertex::value).toList())
+        .isEqualTo(List.of("A", "E", "F", "G"));
   }
 
   // TODO: Fix this, iterator doesn't guarantee that it will start with A!

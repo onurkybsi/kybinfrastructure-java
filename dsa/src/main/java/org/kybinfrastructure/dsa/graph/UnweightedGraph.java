@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class UnweightedGraph<T> implements Iterable<Vertex<T>> {
 
+  // TODO: Consider HashSet for the neighbors!
   private final HashMap<Vertex<T>, ArrayList<Vertex<T>>> vertices;
 
   /**
@@ -58,6 +59,18 @@ public final class UnweightedGraph<T> implements Iterable<Vertex<T>> {
       return null;
     }
     return neighbors.stream().toList(); // We don't want to return the actual list.
+  }
+
+  /**
+   * Adds the given vertex with its neighbors to the graph.
+   * 
+   * @param vertex vertex to add
+   * @param neighbors neighbors of the vertex to add
+   * @throws NullPointerException if {@code vertex} or {@code neighbors} is null, or
+   *         {@code neighbors} contains null
+   */
+  public void add(Vertex<T> vertex, Collection<Vertex<T>> neighbors) {
+    add(this.vertices, vertex, neighbors);
   }
 
   /**
@@ -113,6 +126,29 @@ public final class UnweightedGraph<T> implements Iterable<Vertex<T>> {
       b.append(Arrays.toString(vertex.getValue().stream().map(Vertex::value).toArray()));
     }
     return "UnweightedGraph[%s\n]".formatted(b);
+  }
+
+  static <T> void add(HashMap<Vertex<T>, ArrayList<Vertex<T>>> verticesToAddTo,
+      Vertex<T> vertexToAdd, Collection<Vertex<T>> neighborsToAdd) {
+    Objects.requireNonNull(vertexToAdd, "vertex cannot be null!");
+    Objects.requireNonNull(neighborsToAdd, "neighbors cannot be null!");
+
+    for (Vertex<T> neighborToAdd : neighborsToAdd) {
+      if (neighborToAdd == null)
+        throw new NullPointerException("neighbors cannot contain null!");
+
+      var neighborsOfVertex = verticesToAddTo.getOrDefault(vertexToAdd, new ArrayList<>());
+      if (!neighborsOfVertex.contains(neighborToAdd)) {
+        neighborsOfVertex.add(neighborToAdd);
+        verticesToAddTo.put(vertexToAdd, neighborsOfVertex);
+      }
+
+      var neighborsOfNeighbor = verticesToAddTo.getOrDefault(neighborToAdd, new ArrayList<>());
+      if (!neighborsOfNeighbor.contains(vertexToAdd)) {
+        neighborsOfNeighbor.add(vertexToAdd);
+        verticesToAddTo.put(neighborToAdd, neighborsOfNeighbor);
+      }
+    }
   }
 
   private static <T> ArrayList<Vertex<T>> bfs(HashMap<Vertex<T>, ArrayList<Vertex<T>>> vertices) {

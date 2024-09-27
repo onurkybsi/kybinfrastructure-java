@@ -3,7 +3,6 @@ package org.kybinfrastructure.dsa.graph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -25,21 +24,7 @@ public final class UnweightedGraphBuilder<T> {
    *         {@code neighbors} contains null
    */
   public UnweightedGraphBuilder<T> vertex(Vertex<T> vertex, Collection<Vertex<T>> neighbors) {
-    Objects.requireNonNull(vertex, "vertex cannot be null!");
-    Objects.requireNonNull(neighbors, "neighbors cannot be null!");
-
-    for (Vertex<T> neighbor : neighbors) {
-      if (neighbor == null) {
-        throw new NullPointerException("neighbors cannot contain null!");
-      }
-
-      var vertexNeighbors = this.vertices.getOrDefault(vertex, new ArrayList<>());
-      if (!vertexNeighbors.contains(neighbor)) {
-        vertexNeighbors.add(neighbor);
-        this.vertices.put(vertex, vertexNeighbors);
-      }
-    }
-
+    UnweightedGraph.add(this.vertices, vertex, neighbors);
     return this;
   }
 
