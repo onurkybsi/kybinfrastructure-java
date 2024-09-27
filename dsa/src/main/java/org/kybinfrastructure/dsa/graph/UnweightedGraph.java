@@ -2,6 +2,7 @@ package org.kybinfrastructure.dsa.graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,6 +41,23 @@ public final class UnweightedGraph<T> implements Iterable<Vertex<T>> {
    */
   public int size() {
     return vertices.size();
+  }
+
+  /**
+   * Returns the neighbors of given vertex.
+   * 
+   * @param vertex vertex that its neighbors to return
+   * @return neighbors of the vertex, {@code null} if no such a vertex exists
+   * @throws NullPointerException if given {@code vertex} is null
+   */
+  public Collection<Vertex<T>> neighbors(Vertex<T> vertex) {
+    Objects.requireNonNull(vertex, "vertex cannot be null!");
+
+    var neighbors = this.vertices.get(vertex);
+    if (neighbors == null) {
+      return null;
+    }
+    return neighbors.stream().toList(); // We don't want to return the actual list.
   }
 
   /**

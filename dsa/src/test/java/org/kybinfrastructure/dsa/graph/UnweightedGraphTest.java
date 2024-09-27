@@ -49,6 +49,30 @@ final class UnweightedGraphTest {
     assertThat(actual).isEqualTo(6);
   }
 
+  @Test
+  void should_Return_Neighbors_Of_Given_Vertex() {
+    // given
+    var vertexA = new Vertex<String>("A");
+
+    // when
+    var actual = testGraph.neighbors(vertexA);
+
+    // then
+    assertThat(actual.stream().map(Vertex::value).toList()).isEqualTo(List.of("B", "C", "D"));
+  }
+
+  @Test
+  void should_Return_Null_When_No_Vertex_Exists_To_Return_Its_Neighbors() {
+    // given
+    var vertexG = new Vertex<String>("G");
+
+    // when
+    var actual = testGraph.neighbors(vertexG);
+
+    // then
+    assertThat(actual).isNull();
+  }
+
   // TODO: Fix this, iterator doesn't guarantee that it will start with A!
   @Test
   void should_Return_Iterator_Through_BFS() {
