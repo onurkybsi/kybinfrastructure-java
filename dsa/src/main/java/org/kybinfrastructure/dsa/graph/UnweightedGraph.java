@@ -34,6 +34,15 @@ public final class UnweightedGraph<T> implements Iterable<Vertex<T>> {
   }
 
   /**
+   * Returns the number of vertices in the graph.
+   * 
+   * @return number of vertices in the graph
+   */
+  public int size() {
+    return vertices.size();
+  }
+
+  /**
    * Returns the shortest path between {@code from} and {@code to}.
    * 
    * @param from vertex the path starts from
