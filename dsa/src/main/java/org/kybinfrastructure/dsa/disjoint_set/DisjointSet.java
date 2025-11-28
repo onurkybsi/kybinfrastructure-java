@@ -5,7 +5,7 @@ package org.kybinfrastructure.dsa.disjoint_set;
  * <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure"><i>Disjoint-set</i></a> data
  * structure.
  */
-public sealed interface DisjointSet<T> permits DisjointSetLinkedListImpl {
+public sealed interface DisjointSet<T> permits DisjointSetLinkedListImpl, DisjointSetTreeImpl {
   /**
    * Makes a new set whose only member is the given value if the given value is not part of any set
    * yet.
@@ -45,5 +45,16 @@ public sealed interface DisjointSet<T> permits DisjointSetLinkedListImpl {
    */
   static <T> DisjointSet<T> backedByLinkedList() {
     return DisjointSetLinkedListImpl.of();
+  }
+
+  /**
+   * Builds a new {@code DisjointSet} which makes use of disjoint-set forest data structure under the
+   * hood.
+   * 
+   * @param <T> type of the member values
+   * @return a new {@code DisjointSet}
+   */
+  static <T> DisjointSet<T> backedByTree() {
+    return DisjointSetTreeImpl.of();
   }
 }

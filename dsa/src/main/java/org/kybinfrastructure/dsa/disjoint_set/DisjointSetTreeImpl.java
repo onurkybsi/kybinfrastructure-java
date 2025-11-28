@@ -2,32 +2,32 @@ package org.kybinfrastructure.dsa.disjoint_set;
 
 import java.util.HashMap;
 import java.util.Objects;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-final class DisjointSetLinkedListImpl<T> implements DisjointSet<T> {
+final class DisjointSetTreeImpl<T> implements DisjointSet<T> {
   private final HashMap<T, Node<T>> map;
 
-  static <T> DisjointSetLinkedListImpl<T> of() {
-    return new DisjointSetLinkedListImpl<>(new HashMap<>());
+  static <T> DisjointSetTreeImpl<T> of() {
+    return new DisjointSetTreeImpl<>(new HashMap<>());
   }
 
   @Override
   public Member<T> makeSet(T value) {
     Objects.requireNonNull(value, "value may not be null!");
-
     if (map.containsKey(value)) {
-      return map.get(value).head;
+      return find(value);
+    } else {
+      Node<T> member = new Node<>(value);
+      member.setParent(member);
+      member.setRank(0);
+      map.put(value, member);
+      return member;
     }
-    Node<T> member = new Node<>(value);
-    member.head = member;
-    member.tail = member;
-    member.size = 1;
-    map.put(value, member);
-    return member;
   }
 
   @Override
@@ -44,14 +44,20 @@ final class DisjointSetLinkedListImpl<T> implements DisjointSet<T> {
       throw new IllegalArgumentException("No member found by given 'anotherValue': " + anotherValue);
     }
 
-    if (firstMember.head == secondMember.head) {
-      return firstMember.head;
-    } else if (firstMember.head.size >= secondMember.head.size) {
-      add(secondMember.head, firstMember.head);
-      return firstMember.head;
+    var parent = (Node<T>) find(value);
+    var anotherParent = (Node<T>) find(anotherValue);
+    if (parent.equals(anotherParent)) {
+      return parent;
+    } else if (parent.getRank() > anotherParent.getRank()) {
+      anotherParent.setParent(parent);
+      return parent;
+    } else if (anotherParent.getRank() > parent.getRank()) {
+      parent.setParent(anotherParent);
+      return anotherParent;
     } else {
-      add(firstMember.head, secondMember.head);
-      return secondMember.head;
+      anotherParent.setParent(parent);
+      parent.setRank(parent.getRank() + 1);
+      return parent;
     }
   }
 
@@ -62,24 +68,10 @@ final class DisjointSetLinkedListImpl<T> implements DisjointSet<T> {
     if (member == null) {
       throw new IllegalArgumentException("No member found by given 'value': " + value);
     }
-    return member.head;
-  }
-
-  private static <T> void add(Node<T> from, Node<T> to) {
-    to.setSize(to.getSize() + from.getSize());
-
-    Node<T> previous = to.tail;
-    Node<T> next = from.head;
-    while (next != null) {
-      previous.setNext(next);
-      next.setHead(to);
-      next.setTail(null);
-      next.setSize(0);
-
-      previous = next;
-      next = next.next;
+    if (member.parent != member) {
+      member.setParent((Node<T>) find(member.getParent().getValue()));
     }
-    to.setTail(previous);
+    return member.getParent();
   }
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -87,13 +79,9 @@ final class DisjointSetLinkedListImpl<T> implements DisjointSet<T> {
   static final class Node<T> implements Member<T> {
     private final T value;
     @Setter(AccessLevel.PRIVATE)
-    private Node<T> next;
+    private Node<T> parent;
     @Setter(AccessLevel.PRIVATE)
-    private Node<T> head;
-    @Setter(AccessLevel.PRIVATE)
-    private Node<T> tail; // Only with the head
-    @Setter(AccessLevel.PRIVATE)
-    private int size; // Only with the head
+    private int rank;
 
     @Override
     public T value() {
